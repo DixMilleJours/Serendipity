@@ -71,6 +71,7 @@ function SearchBar(loggedin) {
               color: "white",
               fontSize: "18px",
               width: "200px",
+              marginTop: "50px",
               marginRight: "0px",
             }}
             onClick={() => {
