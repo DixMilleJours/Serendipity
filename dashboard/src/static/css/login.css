@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap');
+
+*{
+    outline: none;
+}
+
+.center {
+    position: relative;
+    flex-direction: column;
+    padding: 40px;
+    /* margin: 10px; */
+    text-align: center;
+}
+
+.contentBox .formBox {
+    position: relative;
+    flex-direction: column;
+    padding: 40px;
+    /* margin: 10px; */
+    text-align: center;
+}
+
+.contentBox .formBox span{
+    left: 0px;
+}
+
+
+.contentBox h3 {
+    margin-left: 1px;
+    text-align: left;
+    color: #607d8b;
+    font-weight: 600;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border-bottom: 4px solid #ff4584;
+    display: inline-block;
+    letter-spacing: 1px;
+}
+
+.back{
+    position: absolute;
+    top: 13px;
+    left:20px;
+    cursor:pointer;
+}
+
+.close {
+    /* position: absolute;
+    top: 10px;
+    right: 200px;
+    cursor: pointer; */
+    cursor: pointer;
+}
+
+
+.contentBox .formBox .inputBox {
+    margin-bottom: 20px;
+}
+
+.contentBox .formBox .info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.contentBox .formBox .title{
+    display: block;
+    color: #fe4066;
+    font-size: 20pt;
+    font-weight: bold;
+    font-family: "Montserrat";
+    text-align: left;
+    margin: 10px;
+    margin-left: 63px;
+}
+
+.contentBox .formBox .title-top{
+    display: block;
+    color: #fe4066;
+    font-size: 20pt;
+    font-weight: bold;
+    font-family: "Montserrat";
+    text-align: left;
+    margin: 10px;
+    margin-left: 63px;
+    margin-top: 50px;
+}
+
+.contentBox .formBox .questions{
+    display: block;
+    color: black;
+    font-weight: bold;
+    margin-left: 63px;
+    text-align: left;
+}
+
+.contentBox .formBox .left{
+    flex-direction: column;
+    width: 408px;
+    left: 0px;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.contentBox .formBox .left .signup{
+    font-family: "Noto Sans";
+    font-weight: bold;
+    font-size: 32pt;
+}
+
+.contentBox .formBox .right{
+    flex-direction: column;
+    width: 408px;
+    right: 0px;
+}
+
+.contentBox .formBox .demographics{
+    margin-top: 147.5px;
+}
+
+#link {
+    font-size: 14px;
+    margin-right: 27px;
+    text-decoration: underline;
+    text-decoration-color: #0a6f84;
+}
+
+#remember {
+    margin-left: 16px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #0a6f84;
+}
+
+#accept {
+    margin-left: 16px;
+    letter-spacing: 1px;
+}
+
+.contentBox .formBox .inputBox button[type="submit"] {
+    align-items: center;
+    justify-content: center;
+    width: 280px;
+    height: 45px;
+    margin: auto;
+    margin-top: 50px;
+    outline: none;
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #607d8b;
+    background: transparent;
+    background:  #ff4584;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.contentBox .formBox .inputBox button[type="submit"]:hover {
+    background: #fe4066;
+}
+
+
+#bt-register{
+    align-items: center;
+    justify-content: center;
+    width: 280px;
+    height: 45px;
+    margin: auto;
+    margin-top: 10px;
+    outline: none;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 2px;
+    background: transparent;
+    background: white;
+    color: #fe4066;
+    border: 2px solid #fe4066;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+#bt-register:hover{
+    background: #eccbd6;
+}
+
+.google-btn button {
+    align-items: center;
+    justify-content: center;
+    width: 280px;
+    height: 45px;
+    margin: auto;
+    margin-top: 10px;
+    outline: none;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 1px;
+    background: white;
+    border-radius: 100px;
+    border: solid 2px #f871a3;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.google-btn button[type="submit"]:hover {
+    background-color: #efd2dc;
+    color: white;
+}
+
+#google-icon {
+    position: absolute;
+    margin-top: 14px;
+    margin-left: 10px;
+}

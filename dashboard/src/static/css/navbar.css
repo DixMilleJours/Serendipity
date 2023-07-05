@@ -1,0 +1,21 @@
+.navbar .navbar-nav .nav-link {
+  font-family: 'Noto Sans';
+  font-size: 16pt;
+  font-weight: bold;
+}
+
+.navbar-default .navbar-nav>li>a {
+  color: #03c2cb;
+}
+
+.navbar-nav button {
+  padding: 10px 50px;
+}
+
+#login-btn :focus{
+  color: #06a7af;
+}
+
+#signup-btn :focus{
+  color: #a1edf0;
+}
