@@ -74,7 +74,7 @@ function SearchBar(loggedin) {
     const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
     try {
-        const response = await axios.post('http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlight', {
+        const response = await axios.post('https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight', {
             data: {
                 slices: [
                     {
