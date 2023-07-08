@@ -12,6 +12,7 @@ Follw the link above to learn about how to set-up Cloud Functions environment an
 `npm run serve` should start the emulator. If the cloud function is correct, it will give you a link. Call that link from the front-end (E.g. using axios) to test functions locally.
 - When ready to deploy to Cloud Functions
 `firebase deploy --only functions`
+- Important: when doing cloud deployment, DELETE the package-lock.json file located under 'functions' folder, otherwise the deployment will show a fake success message. 
 
 # index.js
 - All functions to be deployed are here.
