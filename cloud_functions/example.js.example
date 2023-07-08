@@ -1,0 +1,56 @@
+const functions = require('firebase-functions');
+const axios = require('axios');
+
+// Sub-level cloud function 1
+exports.subFunction1 = functions.https.onRequest(async (req, res) => {
+  // ... handle sub function 1 logic
+});
+
+// Sub-level cloud function 2
+exports.subFunction2 = functions.https.onRequest(async (req, res) => {
+  // ... handle sub function 2 logic
+});
+
+// Sub-level cloud function 3
+exports.subFunction3 = functions.https.onRequest(async (req, res) => {
+  // ... handle sub function 3 logic
+});
+
+// Main cloud function
+exports.mainFunction = functions.https.onRequest(async (req, res) => {
+  const subFunction1Url = 'https://us-central1-yourproject.cloudfunctions.net/subFunction1';
+  const subFunction2Url = 'https://us-central1-yourproject.cloudfunctions.net/subFunction2';
+  const subFunction3Url = 'https://us-central1-yourproject.cloudfunctions.net/subFunction3';
+  
+  const data1 = { /* data for sub function 1 */ };
+  const data2 = { /* data for sub function 2 */ };
+  const data3 = { /* data for sub function 3 */ };
+
+  try {
+    const callSubFunction1 = axios.post(subFunction1Url, data1);
+    const callSubFunction2 = axios.post(subFunction2Url, data2);
+
+    // First kind of logic: several functions could be concurrently called.
+    // E.g. while fetching flights, we could also fetch hotels.
+    const [response1, response2] = await Promise.all([callSubFunction1, callSubFunction2]);
+
+    // Do something with response1 and response2 if needed, and prepare data3
+    data3['field'] = response1.data.someField;
+
+    // Second kind of logic: must wait for previous calls to be successful.
+    // E.g. GPT call has to happen after we've collected all useful data from previous calls.
+    const response3 = await axios.post(subFunction3Url, data3);
+
+    // Combine all responses
+    const combinedData = {
+      data1: response1.data,
+      data2: response2.data,
+      data3: response3.data,
+    };
+
+    res.status(200).send(combinedData);
+  } catch (error) {
+    console.error('Error: ', error);
+    res.status(500).send('Error occurred');
+  }
+});
