@@ -13,6 +13,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "amadeus": "^8.1.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "firebase-admin": "^11.8.0",
