@@ -17,6 +17,9 @@ import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
 
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
+
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -36,6 +39,7 @@ function SearchBar(loggedin) {
   const [rate, setRating] = React.useState(5);
   const [price, setPrice] = React.useState([3000, 6000]);
 
+  const [optimalFlight, setOptimalFlight] = React.useState();
 
   async function generateTrip(e) {
     e.preventDefault();
@@ -100,7 +104,19 @@ function SearchBar(loggedin) {
         setStorage(response.data.data);
         // console.log(storage)
         // console.log(storage[0].owner.name);
-    } catch (error) {
+                // Call getOptimalFlight cloud function with the flight data
+                const functions = getFunctions();
+                const getOptimalFlight = httpsCallable(functions, 'getOptimalFlight');
+                getOptimalFlight({flightData: response.data.data, budget: price}).then(function(result) {
+                  // Read result of the Cloud Function.
+                  var optimalFlight = result.data;
+                  console.log(optimalFlight);
+                  setOptimalFlight(optimalFlight); // Store the result in state
+                }).catch(function(error) {
+                  // Handle error
+                  console.error(error);
+                });        
+                } catch (error) {
         console.error(error);
     }
     

@@ -4,6 +4,19 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
+// Fetch the OpenAI key from the Firebase functions configuration
+const openaiKey = functions.config().openai.key;
+const { Configuration, OpenAIApi } = require("openai");
+
+// Setup OpenAI API configuration with the fetched OpenAI key
+const configuration = new Configuration({
+    apiKey: openaiKey,
+});
+
+const openai = new OpenAIApi(configuration);
+
+  
+
 /* Other imports start here... */
 // Axios
 const axios = require('axios')
@@ -147,8 +160,34 @@ exports.searchHotels = functions.https.onRequest(async (req, res) => {
         });
     })
 })
-
-
+exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
+    const flightData = data.flightData;
+    const budget = data.budget;
+  
+    const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, select the optimal flight.`;
+  
+    try {
+      const gptResponse = await openai.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      });
+  
+      return gptResponse.data.choices[0].message;
+    } catch (error) {
+      console.error('Error making API call to OpenAI: ', error);
+      throw new functions.https.HttpsError('internal', 'Error making API call to OpenAI');
+    }
+  });
+  
 
 
 
