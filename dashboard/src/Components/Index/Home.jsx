@@ -10,14 +10,15 @@ import "../../index.css";
 import "../../static/css/login.css";
 import { useAuth } from "../../AuthContext";
 import Canvas from "./Canvas";
+import TravelDetails from "../Search/Others/TravelDetails";
+import { useSelector } from "react-redux";
 // need to use mui grid v2 for contents view
 
 export default function Home(prefer) {
   const currentUser = useAuth();
-
-  React.useEffect(()=>{
-
-  },[currentUser]);
+  const [isModalOpen, setModalOpen] = React.useState(false);
+  const state = useSelector((state) => state.open);
+  React.useEffect(() => {}, [currentUser]);
 
   return (
     <>

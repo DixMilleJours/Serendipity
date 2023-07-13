@@ -26,8 +26,8 @@ function loadScript(src, position, id) {
 
 const autocompleteService = { current: null };
 
-export default function Departure({placeholder, setDeparture}) {
-  const [value, setValue] = React.useState(null);
+export default function Departure({placeholder, setDeparture, defaultValue}) {
+  const [value, setValue] = React.useState(defaultValue);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const loaded = React.useRef(false);

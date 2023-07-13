@@ -1,15 +1,34 @@
-import * as React from "react";
+import { pink } from "@mui/material/colors";
+import React from "react";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import parse from "autosuggest-highlight/parse";
 import { debounce } from "@mui/material/utils";
+import TextField from "@mui/material/TextField";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import Departure from "./Departure";
+import Destination from "./Destination";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { useSelector, useDispatch } from "react-redux";
+// import { setLocation, setWay } from "../../../state";
+import "../../../static/css/modal.css";
+import "../../../static/css/login.css";
+import { Button } from "@mui/material";
 
-// This key was created specifically for the demo in mui.com.
-// You need to create a new one for your application.
 const GOOGLE_MAPS_API_KEY = "AIzaSyC6ypOzv4pxq3lM4SbI5Mh7MlnJUapoZuQ";
 
 function loadScript(src, position, id) {
@@ -26,12 +45,7 @@ function loadScript(src, position, id) {
 
 const autocompleteService = { current: null };
 
-export default function Destination({
-  marginLeft,
-  placeholder,
-  setDestination,
-  defaultValue
-}) {
+function Location({ placeholder, defaultValue }) {
   const [value, setValue] = React.useState(defaultValue);
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState([]);
@@ -97,7 +111,7 @@ export default function Destination({
   return (
     <Autocomplete
       id="google-map-demo"
-      sx={{ width: 270, marginLeft: { marginLeft } }}
+      sx={{ width: 270 }}
       getOptionLabel={(option) =>
         typeof option === "string" ? option : option.description
       }
@@ -111,7 +125,6 @@ export default function Destination({
       onChange={(event, newValue) => {
         setOptions(newValue ? [newValue, ...options] : options);
         setValue(newValue);
-        setDestination(newValue);
       }}
       onInputChange={(event, newInputValue) => {
         setInputValue(newInputValue);
@@ -158,3 +171,96 @@ export default function Destination({
     />
   );
 }
+
+
+
+
+function HotelDetails({ setModalOpen, setHotelDetails }) {
+  const dispatch = useDispatch();
+  const departure = useSelector((state) => state.departure);
+  const destination = useSelector((state) => state.destination);
+  const [room, setRooms] = React.useState(0);
+
+  // const handleWays = (event) => {
+  //   setWay(event.target.value);
+  //   dispatch(setWay({ way }));
+  // };
+
+  function save() {
+    // dispatch(setLocation({ departure, destination }));
+    // dispatch(setWay({ way }));
+    setModalOpen(false);
+    setHotelDetails(true);
+  }
+
+  function removeRooms(){
+    if(room > 0){
+      setRooms(room-1);
+    }
+  }
+
+  function addRooms(){
+    setRooms(room+1);
+  }
+
+
+  return (
+    <div className="modalBackground">
+      <div className="modalContainer">
+        <div className="title">
+          <h2
+            style={{
+              fontSize: "25pt",
+              color: pink[400],
+            }}
+          >
+            Hotel&nbsp;&nbsp;&nbsp;&nbsp;Details
+          </h2>
+        </div>
+        <div className="contentBox">
+          <div className="formBox">
+            <form>
+              <Box>
+                <div className="inputContainer">
+                  
+                  <Box display="flex" flexDirection="row">
+                    <h4>Room Quantity</h4>
+                    <RemoveCircleOutlineIcon sx={{ color: pink[500] }} onClick={removeRooms} />
+                    {room}
+                    <AddCircleIcon  sx={{ color: pink[500] }}  onClick={addRooms}/>
+                   
+                  </Box>
+                  
+                  <FormControl style={{ marginTop: "20px" }}>
+                    <Location
+                      placeholder={"Departure"}
+                      defaultValue={departure.description}
+                    />
+                  </FormControl>
+                  <FormControl style={{ marginTop: "20px" }}>
+                    <Location
+                      placeholder={"Destination"}
+                      defaultValue={destination.description}
+                    />
+                  </FormControl>
+
+                  <button
+                    className="saveBtn"
+                    type="submit"
+                    id="bt-register"
+                    style={{ marginTop: "80px" }}
+                    onClick={save}
+                  >
+                    Save
+                  </button>
+                </div>
+              </Box>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default HotelDetails;
