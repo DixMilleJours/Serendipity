@@ -83,8 +83,8 @@ exports.searchFlightV2 = functions.https.onRequest(async (req, res) => {
             // TODO - Get request from front-end.
             originLocationCode: 'YYZ',
             destinationLocationCode: 'JFK',
-            departureDate: '2023-07-13',
-            returnDate: '2023-07-17',
+            departureDate: '2023-07-17',
+            returnDate: '2023-07-24',
             adults: '1',
             children: '1',
             travelClass: 'ECONOMY',
@@ -162,19 +162,19 @@ exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
     const budget = data.budget;
 
     // !!!! budget is an array of 2 numbers, so will need to change the prompt.
-    const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, select the optimal flight.`;
+    const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, return the optimal flight in human-readable sentence. No explanation.`;
 
     try {
         const gptResponse = await openai.createChatCompletion({
             model: 'gpt-3.5-turbo',
             messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
+                {
+                    role: 'user',
+                    content: prompt
+                }
             ]
-          })
-          return { gptResponse: gptResponse.data.choices[0].message }
+        })
+        return { gptResponse: gptResponse.data.choices[0].message }
     } catch (error) {
         return { error: 'An error occurred while processing your request.' };
     }

@@ -17,8 +17,12 @@ import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
 
-import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
-import { initializeApp } from 'firebase/app';
+import {
+  getFunctions,
+  httpsCallable,
+  connectFunctionsEmulator,
+} from "firebase/functions";
+import { initializeApp } from "firebase/app";
 import { getApp } from "firebase/app";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
@@ -71,45 +75,42 @@ function SearchBar(loggedin) {
   const [storage, setStorage] = React.useState();
 
   const handleClick = async () => {
+    try {
+      // reset storage
+      setStorage();
 
-    // reset storage
-    setStorage()
+      // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
+      // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
+      // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
 
-    const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-    const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-    // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-    
-        await axios.get('https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlightV2').then(async (response) => {
-          // setStorage(response.data.data);
-          // Call getOptimalFlight cloud function with the flight data
+      // ！！！ local testing for now.
+      const response = await axios.get(
+        "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
+      );
+      // setStorage(response.data.data);
+      // Call getOptimalFlight cloud function with the flight data
+      const functions = getFunctions();
+      // !!! switch to use deployed function later
+      const functionss = getFunctions(getApp());
+      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
 
+      const getOptimalFlight = httpsCallable(functionss, "getOptimalFlight");
+      // !!! harcode budget for now.
+      const optimalFlightResponse = await getOptimalFlight({
+        flightData: response.data,
+        budget: "1000",
+      });
 
-          
-
-
-
-          const functions = getFunctions();
-
-
-          // !!! switch to use deployed function later
-          const functionss = getFunctions(getApp());
-          connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-
-
-          const getOptimalFlight = httpsCallable(functionss, 'getOptimalFlight');
-          // !!! harcode budget for now.
-          return getOptimalFlight({flightData: response.data, budget: '680'})
-        }).then(function(response) {
-                  // Read result of the Cloud Function.
-                  const optimalFlight = response.data;
-                  console.log(response.data);
-                  setOptimalFlight(optimalFlight); // Store the result in state
-                }).catch(function(error) {
-                  // Handle error
-                  console.error(error);
-                });
-                }
-
+      // Read result of the Cloud Function.
+      const optimalFlight = optimalFlightResponse.data.gptResponse.content;
+      console.log(optimalFlight)
+      setStorage(optimalFlight)
+      setOptimalFlight(optimalFlight); // Store the result in state
+    } catch (error) {
+      // Handle error
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -136,9 +137,12 @@ function SearchBar(loggedin) {
         </Bounce>
       )}
       {isLoading && loggedin && (
-        <div className="contentBox" style={{
-          marginTop: "50px",
-        }}>
+        <div
+          className="contentBox"
+          style={{
+            marginTop: "50px",
+          }}
+        >
           <div className="formBox">
             <form>
               {/* <Box sx={{ flexGrow: 1 }}> */}
@@ -214,23 +218,25 @@ function SearchBar(loggedin) {
                     </Button>
                   </Item>
                 </Grid>
-               {/* Temporary Addition */}
+                {/* Temporary Addition */}
                 <Grid xs={6}>
                   <Item style={{ display: "flex", flexDirection: "row" }}>
                     <TextField
-                    label="Departure"
-                    onChange={(event) => {
-                      setDeparture(event.target.value)
-                    }}></TextField>
+                      label="Departure"
+                      onChange={(event) => {
+                        setDeparture(event.target.value);
+                      }}
+                    ></TextField>
                   </Item>
                 </Grid>
                 <Grid xs={6}>
                   <Item style={{ display: "flex", flexDirection: "row" }}>
                     <TextField
-                    label="Destination"
-                    onChange={(event) => {
-                      setDestination(event.target.value)
-                    }}></TextField>
+                      label="Destination"
+                      onChange={(event) => {
+                        setDestination(event.target.value);
+                      }}
+                    ></TextField>
                   </Item>
                 </Grid>
               </Grid>
@@ -251,44 +257,56 @@ function SearchBar(loggedin) {
               {storage && (
                 <Grid container spacing={2.5}>
                   <Grid xs={12} flexDirection="row">
-                  <Item
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginRight: "2px",
-                    }}
-                  >
-                    <div>
-                    <h2>Results found...</h2>
-                    {storage.map((item, index) => {
-                      return <div key={index}>
-                         <h3>Flight {index + 1}</h3>
-                         <p>
-                          {item.owner.name}
-                          <img
-                          src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
-                          width={24}
-                          height={24}
-                          />
-                          {item.total_amount + " " + item.total_currency}
-                         </p>
+                    <Item
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginRight: "2px",
+                      }}
+                    >
+                      <hr></hr>
+                      <p>{storage}</p>
+                      {/* <div>
+                        <h2>Results found...</h2>
+                        {storage.map((item, index) => {
+                          return (
+                            <div key={index}>
+                              <h3>Flight {index + 1}</h3>
+                              <p>
+                                {item.owner.name}
+                                <img
+                                  src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
+                                  width={24}
+                                  height={24}
+                                />
+                                {item.total_amount + " " + item.total_currency}
+                              </p>
 
-                          <p>
-                            {formatDateTime(item.slices[0].segments[0].departing_at)}
-                            <hr width="10px"></hr>
-                            {formatDateTime(item.slices[0].segments[0].arriving_at)}
-                          </p>
-                          <hr></hr>
-                          <p>
-                            {formatDateTime(item.slices[1].segments[0].departing_at)}
-                            <hr width="10px"></hr>
-                            {formatDateTime(item.slices[1].segments[0].arriving_at)}
-                          </p>
-                      </div>
-                    })}
-                    </div>
-                  </Item>
-                </Grid>
+                              <p>
+                                {formatDateTime(
+                                  item.slices[0].segments[0].departing_at
+                                )}
+                                <hr width="10px"></hr>
+                                {formatDateTime(
+                                  item.slices[0].segments[0].arriving_at
+                                )}
+                              </p>
+                              <hr></hr>
+                              <p>
+                                {formatDateTime(
+                                  item.slices[1].segments[0].departing_at
+                                )}
+                                <hr width="10px"></hr>
+                                {formatDateTime(
+                                  item.slices[1].segments[0].arriving_at
+                                )}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div> */}
+                    </Item>
+                  </Grid>
                 </Grid>
               )}
             </form>
@@ -304,14 +322,13 @@ const formatDateTime = (dateTimeString) => {
   const dateObj = new Date(dateTimeString);
 
   // Extract the date and time components
-  const date = dateObj.toLocaleDateString('en-US');
-  const time = dateObj.toLocaleTimeString('en-US');
+  const date = dateObj.toLocaleDateString("en-US");
+  const time = dateObj.toLocaleTimeString("en-US");
 
   // Concatenate the date and time components
   const formattedString = `${date}, ${time}`;
 
   return formattedString;
 };
-
 
 export default SearchBar;
