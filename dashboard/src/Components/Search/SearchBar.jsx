@@ -112,6 +112,17 @@ function SearchBar(loggedin) {
     }
   };
 
+  const handleClickV2 = async () => {
+    const functionss = getFunctions();
+    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+    const generator = httpsCallable(functionss, "generator");
+    const finalResult = await generator({});
+    // Read result of the Cloud Function.
+    const result = finalResult.data.finalResult;
+    console.log(result)
+    setStorage(result)
+  }
+
   return (
     <>
       {visible && (
@@ -250,7 +261,7 @@ function SearchBar(loggedin) {
                 }}
                 variant="contained"
                 endIcon={<SendIcon />}
-                onClick={handleClick}
+                onClick={handleClickV2}
               >
                 Let's go!
               </Button>

@@ -1,5 +1,7 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 const functions = require("firebase-functions");
+const { getFunctions, httpsCallable, connectFunctionsEmulator } = require('firebase/functions');
+const { getApp } = require('firebase/app');
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -136,10 +138,10 @@ exports.searchHotels = functions.https.onRequest(async (req, res) => {
 
             return await amadeus.shopping.hotelOffersSearch.get({
                 hotelIds: JSON.stringify(hotelIds),
-                adults: '2',
-                checkInDate: '2023-07-13',
-                checkOutDate: '2023-07-16',
-                roomQuantity: '3',
+                adults: '1',
+                checkInDate: '2023-07-17',
+                checkOutDate: '2023-07-24',
+                roomQuantity: '1',
             })
         }).then((response) => {
             let hotelRes = response.data.map((hotel) => ({
@@ -157,6 +159,7 @@ exports.searchHotels = functions.https.onRequest(async (req, res) => {
         });
     })
 })
+
 exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
     const flightData = data.flightData;
     const budget = data.budget;
@@ -180,6 +183,56 @@ exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
     }
 });
 
+async function getOptimalFlightV2(data) {
+    const flightData = data.flightData;
+    const budget = data.budget;
 
+    // !!!! budget is an array of 2 numbers, so will need to change the prompt.
+    const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, return the optimal flight in human-readable sentence. No explanation.`;
+
+    try {
+        const gptResponse = await openai.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ]
+        })
+        return gptResponse.data.choices[0].message
+    } catch (error) {
+        throw new Error(`GPT-3 API error: ${error.message}`);
+    }
+}
+
+exports.generator = functions.https.onCall(async (data, context) => {
+    try {
+        /* First, get the JSON fields for the subsequent API calls. */
+
+        // const flight = data.flight
+        // const hotel = data.hotel
+
+        /* Second, make API calls.  */
+
+        // !!! local test for now.
+        const flightPromise = axios.post('http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2')
+            .catch(error => { throw new Error(`Flight API error: ${error.message}`); });
+        const hotelPromise = axios.get('http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchHotels')
+            .catch(error => { throw new Error(`Hotel API error: ${error.message}`); });
+
+        const [flightResponse, hotelResponse] = await Promise.all([flightPromise, hotelPromise]);
+
+        const optimalFlightResponse = await getOptimalFlightV2({
+            flightData: flightResponse.data,
+            budget: "1000",
+        })
+        const optimalFlight = optimalFlightResponse.content;
+        return { finalResult: optimalFlight }
+    } catch (error) {
+        console.error(error);
+        throw new functions.https.HttpsError('unknown', error.message);
+    }
+})
 
 
