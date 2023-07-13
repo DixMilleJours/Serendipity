@@ -17,8 +17,9 @@ import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
 
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
+import { getApp } from "firebase/app";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -77,50 +78,38 @@ function SearchBar(loggedin) {
     const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
     const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-    try {
-        const response = await axios.post('https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight', {
-            data: {
-                slices: [
-                    {
-                        origin: departure,
-                        destination: destination,
-                        departure_date: startDate
-                    },
-                    {
-                        origin: destination,
-                        destination: departure,
-                        departure_date: endDate
-                    }
-                ],
-                passengers: [
-                    {
-                        type: "adult"
-                    }
-                ],
-                cabin_class: "business",
-                max_connections: 0
-            }
-        });
-        setStorage(response.data.data);
-        // console.log(storage)
-        // console.log(storage[0].owner.name);
-                // Call getOptimalFlight cloud function with the flight data
-                const functions = getFunctions();
-                const getOptimalFlight = httpsCallable(functions, 'getOptimalFlight');
-                getOptimalFlight({flightData: response.data.data, budget: price}).then(function(result) {
+    
+        await axios.get('https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlightV2').then(async (response) => {
+          // setStorage(response.data.data);
+          // Call getOptimalFlight cloud function with the flight data
+
+
+          
+
+
+
+          const functions = getFunctions();
+
+
+          // !!! switch to use deployed function later
+          const functionss = getFunctions(getApp());
+          connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+
+
+          const getOptimalFlight = httpsCallable(functionss, 'getOptimalFlight');
+          // !!! harcode budget for now.
+          return getOptimalFlight({flightData: response.data, budget: '680'})
+        }).then(function(response) {
                   // Read result of the Cloud Function.
-                  var optimalFlight = result.data;
-                  console.log(optimalFlight);
+                  const optimalFlight = response.data;
+                  console.log(response.data);
                   setOptimalFlight(optimalFlight); // Store the result in state
                 }).catch(function(error) {
                   // Handle error
                   console.error(error);
-                });        
-                } catch (error) {
-        console.error(error);
-    }
-    
-}
+                });
+                }
+
 
   return (
     <>

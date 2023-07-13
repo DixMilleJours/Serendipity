@@ -5,17 +5,14 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 // Fetch the OpenAI key from the Firebase functions configuration
-const openaiKey = functions.config().openai.key;
 const { Configuration, OpenAIApi } = require("openai");
 
 // Setup OpenAI API configuration with the fetched OpenAI key
 const configuration = new Configuration({
-    apiKey: openaiKey,
+    apiKey: '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',
 });
 
 const openai = new OpenAIApi(configuration);
-
-  
 
 /* Other imports start here... */
 // Axios
@@ -163,31 +160,26 @@ exports.searchHotels = functions.https.onRequest(async (req, res) => {
 exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
     const flightData = data.flightData;
     const budget = data.budget;
-  
+
+    // !!!! budget is an array of 2 numbers, so will need to change the prompt.
     const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, select the optimal flight.`;
-  
+
     try {
-      const gptResponse = await openai.createChatCompletion({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
-      });
-  
-      return gptResponse.data.choices[0].message;
+        const gptResponse = await openai.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ]
+          })
+          return { gptResponse: gptResponse.data.choices[0].message }
     } catch (error) {
-      console.error('Error making API call to OpenAI: ', error);
-      throw new functions.https.HttpsError('internal', 'Error making API call to OpenAI');
+        return { error: 'An error occurred while processing your request.' };
     }
-  });
-  
+});
+
 
 
 
