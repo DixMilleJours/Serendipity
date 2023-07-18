@@ -148,7 +148,21 @@ exports.searchHotels = functions.https.onRequest(async (req, res) => {
     })
 })
 
-
+exports.searchAttractions = functions.https.onRequest(async(req, res)=>{
+    cors(req, res, async () => {
+        amadeus.referenceData.locations.pointsOfInterest.get({
+            latitude: '43.64289',
+            longitude: '-79.40103',
+            radius:2
+          }).then((response) => {
+            res.set('Access-Control-Allow-Origin', '*');
+            res.send(response)
+        }).catch((error) => {
+            res.set('Access-Control-Allow-Origin', '*');
+            res.send(error)
+        });
+    })
+})
 
 
 
