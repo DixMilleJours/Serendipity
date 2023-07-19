@@ -36,7 +36,6 @@ function SearchBar(loggedin) {
   const [rate, setRating] = React.useState(5);
   const [price, setPrice] = React.useState([3000, 6000]);
 
-
   async function generateTrip(e) {
     e.preventDefault();
     // dictionary value
@@ -66,45 +65,47 @@ function SearchBar(loggedin) {
   const [storage, setStorage] = React.useState();
 
   const handleClick = async () => {
-
     // reset storage
-    setStorage()
+    setStorage();
 
     const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
     const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
     try {
-        const response = await axios.post('https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight', {
-            data: {
-                slices: [
-                    {
-                        origin: departure,
-                        destination: destination,
-                        departure_date: startDate
-                    },
-                    {
-                        origin: destination,
-                        destination: departure,
-                        departure_date: endDate
-                    }
-                ],
-                passengers: [
-                    {
-                        type: "adult"
-                    }
-                ],
-                cabin_class: "business",
-                max_connections: 0
-            }
-        });
-        setStorage(response.data.data);
-        // console.log(storage)
-        // console.log(storage[0].owner.name);
+      // reset storage
+      setStorage();
+
+      // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
+      // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
+      // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
+
+      // ！！！ local testing for now.
+      const response = await axios.get(
+        "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
+      );
+      // setStorage(response.data.data);
+      // Call getOptimalFlight cloud function with the flight data
+      const functions = getFunctions();
+      // !!! switch to use deployed function later
+      const functionss = getFunctions(getApp());
+      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+
+      const getOptimalFlight = httpsCallable(functionss, "generator");
+      // !!! harcode budget for now.
+      const optimalFlightResponse = await getOptimalFlight({
+        flightData: response.data,
+        budget: "1000",
+      });
+
+      // Read result of the Cloud Function.
+      const optimalFlight = optimalFlightResponse.data.gptResponse.content;
+      console.log(optimalFlight);
+      setStorage(optimalFlight);
+      setOptimalFlight(optimalFlight); // Store the result in state
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-    
-}
+  };
 
   return (
     <>
@@ -131,9 +132,12 @@ function SearchBar(loggedin) {
         </Bounce>
       )}
       {isLoading && loggedin && (
-        <div className="contentBox" style={{
-          marginTop: "50px",
-        }}>
+        <div
+          className="contentBox"
+          style={{
+            marginTop: "50px",
+          }}
+        >
           <div className="formBox">
             <form>
               {/* <Box sx={{ flexGrow: 1 }}> */}
@@ -209,23 +213,25 @@ function SearchBar(loggedin) {
                     </Button>
                   </Item>
                 </Grid>
-               {/* Temporary Addition */}
+                {/* Temporary Addition */}
                 <Grid xs={6}>
                   <Item style={{ display: "flex", flexDirection: "row" }}>
                     <TextField
-                    label="Departure"
-                    onChange={(event) => {
-                      setDeparture(event.target.value)
-                    }}></TextField>
+                      label="Departure"
+                      onChange={(event) => {
+                        setDeparture(event.target.value);
+                      }}
+                    ></TextField>
                   </Item>
                 </Grid>
                 <Grid xs={6}>
                   <Item style={{ display: "flex", flexDirection: "row" }}>
                     <TextField
-                    label="Destination"
-                    onChange={(event) => {
-                      setDestination(event.target.value)
-                    }}></TextField>
+                      label="Destination"
+                      onChange={(event) => {
+                        setDestination(event.target.value);
+                      }}
+                    ></TextField>
                   </Item>
                 </Grid>
               </Grid>
@@ -246,44 +252,54 @@ function SearchBar(loggedin) {
               {storage && (
                 <Grid container spacing={2.5}>
                   <Grid xs={12} flexDirection="row">
-                  <Item
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginRight: "2px",
-                    }}
-                  >
-                    <div>
-                    <h2>Results found...</h2>
-                    {storage.map((item, index) => {
-                      return <div key={index}>
-                         <h3>Flight {index + 1}</h3>
-                         <p>
-                          {item.owner.name}
-                          <img
-                          src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
-                          width={24}
-                          height={24}
-                          />
-                          {item.total_amount + " " + item.total_currency}
-                         </p>
+                    <Item
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        marginRight: "2px",
+                      }}
+                    >
+                      <div>
+                        <h2>Results found...</h2>
+                        {storage.map((item, index) => {
+                          return (
+                            <div key={index}>
+                              <h3>Flight {index + 1}</h3>
+                              <p>
+                                {item.owner.name}
+                                <img
+                                  src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
+                                  width={24}
+                                  height={24}
+                                />
+                                {item.total_amount + " " + item.total_currency}
+                              </p>
 
-                          <p>
-                            {formatDateTime(item.slices[0].segments[0].departing_at)}
-                            <hr width="10px"></hr>
-                            {formatDateTime(item.slices[0].segments[0].arriving_at)}
-                          </p>
-                          <hr></hr>
-                          <p>
-                            {formatDateTime(item.slices[1].segments[0].departing_at)}
-                            <hr width="10px"></hr>
-                            {formatDateTime(item.slices[1].segments[0].arriving_at)}
-                          </p>
+                              <p>
+                                {formatDateTime(
+                                  item.slices[0].segments[0].departing_at
+                                )}
+                                <hr width="10px"></hr>
+                                {formatDateTime(
+                                  item.slices[0].segments[0].arriving_at
+                                )}
+                              </p>
+                              <hr></hr>
+                              <p>
+                                {formatDateTime(
+                                  item.slices[1].segments[0].departing_at
+                                )}
+                                <hr width="10px"></hr>
+                                {formatDateTime(
+                                  item.slices[1].segments[0].arriving_at
+                                )}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </div>
-                    })}
-                    </div>
-                  </Item>
-                </Grid>
+                    </Item>
+                  </Grid>
                 </Grid>
               )}
             </form>
@@ -299,14 +315,13 @@ const formatDateTime = (dateTimeString) => {
   const dateObj = new Date(dateTimeString);
 
   // Extract the date and time components
-  const date = dateObj.toLocaleDateString('en-US');
-  const time = dateObj.toLocaleTimeString('en-US');
+  const date = dateObj.toLocaleDateString("en-US");
+  const time = dateObj.toLocaleTimeString("en-US");
 
   // Concatenate the date and time components
   const formattedString = `${date}, ${time}`;
 
   return formattedString;
 };
-
 
 export default SearchBar;
