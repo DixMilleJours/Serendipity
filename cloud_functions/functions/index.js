@@ -233,12 +233,12 @@ async function searchHotels() {
     }
 }
 
-async function searchFlight() {
+async function searchFlight(flight) {
     try {
         const response = await amadeus.shopping.flightOffersSearch.get({
             // TODO - Get request from front-end.
-            originLocationCode: 'YYZ',
-            destinationLocationCode: 'JFK',
+            originLocationCode: flight.depart,
+            destinationLocationCode: flight.dest,
             departureDate: '2023-07-20',
             returnDate: '2023-07-24',
             adults: '1',
@@ -318,8 +318,9 @@ async function gpt(data) {
 }
 
 async function fetchRestaurants(location, radius) {
-    // First fetch with user preference
-    const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+    try {
+        // First fetch with user preference
+        const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
             params: {
                 keyword: 'vietnamese or mexican',
                 location: '43.472599613636696, -80.53789113576617',
@@ -330,45 +331,52 @@ async function fetchRestaurants(location, radius) {
                 key: `${googleAPI}`
             }
         })
-    const firstResults = response1.data.results;
+        let firstResults = response1.data.results;
 
-    // Second fetch for any cuisine
-    const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
-        params: {
-            keyword: 'any cuisine',
-            location: '43.472599613636696, -80.53789113576617',
-            radius: 4000,
-            minprice: 2,
-            type: 'restaurant',
-            key: `${googleAPI}`
+        // Second fetch for any cuisine
+        const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+            params: {
+                keyword: 'any cuisine',
+                location: '43.472599613636696, -80.53789113576617',
+                radius: 4000,
+                minprice: 2,
+                type: 'restaurant',
+                key: `${googleAPI}`
+            }
+        });
+        let secondResults = response2.data.results;
+        // Merge and remove duplicates, prioritizing user preference results
+        let ids = new Set(firstResults.map(result => result.place_id));
+
+        // Only add places from the secondResults that have a new place_id
+        for (let place of secondResults) {
+            if (!ids.has(place.place_id)) {
+                firstResults.push(place);
+                ids.add(place.place_id);
+            }
         }
-    });
-    const secondResults = response2.data.results;
-    // Merge and remove duplicates, prioritizing user preference results
-    let ids = new Set(firstResults.map(result => result.place_id));
 
-    // Only add places from the secondResults that have a new place_id
-    for(let place of secondResults) {
-        if(!ids.has(place.place_id)) {
-            firstResults.push(place);
-            ids.add(place.place_id);
+        // Filter out any restaurants that are not currently operational
+        firstResults = firstResults.filter(restaurant => !restaurant.business_status || (restaurant.business_status !== 'CLOSED_TEMPORARILY' && restaurant.business_status !== 'CLOSED_PERMANENTLY'));
+
+
+        // Make sure no more than 40 results are returned
+        const finalResults = firstResults.slice(0, 40);
+
+        // Error handling.
+        if (!finalResults.length) {
+            throw new Error('No restaurants found');
         }
+        let restaurantRes = finalResults.map((res) => ({
+            resName: res.name,
+            resID: res.place_id,
+            resRating: res.rating,
+            resTypes: res.types
+        }))
+        return restaurantRes
+    } catch (error) {
+        throw new Error(`search places API error: ${error.message}`);
     }
-
-    // Make sure no more than 40 results are returned
-    const finalResults = firstResults.slice(0, 40);
-
-    // Error handling.
-    if (!finalResults.length) {
-        throw new Error('No restaurants found');
-    }
-    let restaurantRes = finalResults.map((res) => ({
-        resName: res.name,
-        resID: res.place_id,
-        resRating: res.rating,
-        resTypes: res.types
-    }))
-    return restaurantRes
 }
 
 async function searchRestaurants() {
@@ -401,6 +409,65 @@ async function searchRestaurants() {
     }
 }
 
+async function searchTouristAttraction() {
+    try {
+        const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+            params: {
+                keyword: 'museum or park',
+                location: '43.472599613636696, -80.53789113576617',
+                radius: 5000,
+                maxprice: '',
+                minprice: '',
+                type: 'tourist_attraction',
+                key: `${googleAPI}`
+            }
+        })
+        let firstResults = response1.data.results;
+
+        // Second fetch for any cuisine
+        const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+            params: {
+                keyword: 'popular tourist attractions',
+                location: '43.472599613636696, -80.53789113576617',
+                radius: 5000,
+                type: 'tourist_attraction',
+                key: `${googleAPI}`
+            }
+        });
+        let secondResults = response2.data.results;
+        // Merge and remove duplicates, prioritizing user preference results
+        let ids = new Set(firstResults.map(result => result.place_id));
+
+        // Only add places from the secondResults that have a new place_id
+        for (let place of secondResults) {
+            if (!ids.has(place.place_id)) {
+                firstResults.push(place);
+                ids.add(place.place_id);
+            }
+        }
+
+        // Filter out any restaurants that are not currently operational
+        firstResults = firstResults.filter(restaurant => !restaurant.business_status || (restaurant.business_status !== 'CLOSED_TEMPORARILY' && restaurant.business_status !== 'CLOSED_PERMANENTLY'));
+
+        // Make sure no more than 40 results are returned
+        const finalResults = firstResults.slice(0, 40);
+
+        // Error handling.
+        if (!finalResults.length) {
+            throw new Error('No attractions found');
+        }
+        let touristAttractionRes = finalResults.map((data) => ({
+            touristAttractionName: data.name,
+            touristAttractionID: data.place_id,
+            touristAttractionRating: data.rating,
+            touristAttractionTypes: data.types
+        }))
+        return touristAttractionRes
+    } catch (error) {
+        throw new Error(`search places API error: ${error.message}`);
+    }
+}
+
 exports.generator = functions.https.onCall(async (data, context) => {
     try {
         /* First, get the JSON fields for the subsequent API calls. */
@@ -415,8 +482,8 @@ exports.generator = functions.https.onCall(async (data, context) => {
         // const hotelPromise =  searchHotels()
         // const [flightResponse, hotelResponse] = await Promise.all([flightPromise, hotelPromise]);
         // const { averageLat, averageLong } = getAverageLatLong(hotelResponse);
-        const restaurants = await fetchRestaurants()
-        console.log(restaurants)
+        const tour = await searchTouristAttraction()
+        console.log(tour)
 
         // const gptResponse = await gpt({
         //     flightData: flightResponse,

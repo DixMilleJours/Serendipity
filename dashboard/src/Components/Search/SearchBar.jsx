@@ -126,23 +126,44 @@ function SearchBar({ loggedin, setError }) {
       const functionss = getFunctions(getApp());
       connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
 
-      const getOptimalFlight = httpsCallable(functionss, "generator");
+      const getFinalResult = httpsCallable(functionss, "generator");
       // !!! harcode budget for now.
-      const optimalFlightResponse = await getOptimalFlight({
+      const finalResult = await getFinalResult({
         // flightData: response.data,
         // budget: "1000",
       });
 
       // Read result of the Cloud Function.
-      // const optimalFlight = optimalFlightResponse.data.gptResponse.content;
-      // console.log(optimalFlight);
-      // setStorage(optimalFlight);
-      //setOptimalFlight(optimalFlight); // Store the result in state
+      const optimalResult = finalResult.data.gptResponse.content;
+      console.log(optimalResult);
+      setStorage(optimalResult);
     } catch (error) {
       console.error(error);
       console.error(error);
     }
   };
+
+  const flightData = {
+    depart: departure,
+    dest: destination,
+    startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
+    endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
+    
+
+  }
+
+  const handleClickV2 = async () => {
+    const functionss = getFunctions();
+    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+    const generator = httpsCallable(functionss, "generator");
+    const finalResult = await generator({
+
+    });
+    // Read result of the Cloud Function.
+    const result = finalResult.data.finalResult;
+    console.log(result)
+    setStorage(result)
+  }
 
   return (
     <>
@@ -412,7 +433,7 @@ function SearchBar({ loggedin, setError }) {
                     }}
                     variant="contained"
                     endIcon={<SendIcon />}
-                    onClick={handleClick}
+                    onClick={handleClickV2}
                   >
                     Let's go!
                   </Button>
@@ -426,47 +447,8 @@ function SearchBar({ loggedin, setError }) {
                             marginRight: "2px",
                           }}
                         >
-                          <div>
-                            <h2>Results found...</h2>
-                            {storage.map((item, index) => {
-                              return (
-                                <div key={index}>
-                                  <h3>Flight {index + 1}</h3>
-                                  <p>
-                                    {item.owner.name}
-                                    <img
-                                      src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
-                                      width={24}
-                                      height={24}
-                                    />
-                                    {item.total_amount +
-                                      " " +
-                                      item.total_currency}
-                                  </p>
-
-                                  <p>
-                                    {formatDateTime(
-                                      item.slices[0].segments[0].departing_at
-                                    )}
-                                    <hr width="10px"></hr>
-                                    {formatDateTime(
-                                      item.slices[0].segments[0].arriving_at
-                                    )}
-                                  </p>
-                                  <hr></hr>
-                                  <p>
-                                    {formatDateTime(
-                                      item.slices[1].segments[0].departing_at
-                                    )}
-                                    <hr width="10px"></hr>
-                                    {formatDateTime(
-                                      item.slices[1].segments[0].arriving_at
-                                    )}
-                                  </p>
-                                </div>
-                              );
-                            })}
-                          </div>
+                          <hr></hr>
+                          <p>{storage}</p>
                         </Item>
                       </Grid>
                     </Grid>
