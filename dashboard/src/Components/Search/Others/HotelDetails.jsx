@@ -1,4 +1,4 @@
-import { pink } from "@mui/material/colors";
+import { pink, grey } from "@mui/material/colors";
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -9,25 +9,14 @@ import Typography from "@mui/material/Typography";
 import parse from "autosuggest-highlight/parse";
 import { debounce } from "@mui/material/utils";
 import TextField from "@mui/material/TextField";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Chip from "@mui/material/Chip";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import Modal from "@mui/material/Modal";
 import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import Departure from "./Departure";
-import Destination from "./Destination";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { useSelector, useDispatch } from "react-redux";
-// import { setLocation, setWay } from "../../../state";
+import { setLocation, setHotel } from "../../../state";
 import "../../../static/css/modal.css";
 import "../../../static/css/login.css";
-import { Button } from "@mui/material";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyC6ypOzv4pxq3lM4SbI5Mh7MlnJUapoZuQ";
 
@@ -172,66 +161,137 @@ function Location({ placeholder, defaultValue }) {
   );
 }
 
-
-
-
 function HotelDetails({ setModalOpen, setHotelDetails }) {
+  const preferredMode = useSelector((state) => state.mode);
   const dispatch = useDispatch();
+  const [bgcolor, setBgcolor] = React.useState("");
+  const [containerColor, setContainerColor] = React.useState("");
   const departure = useSelector((state) => state.departure);
   const destination = useSelector((state) => state.destination);
   const [room, setRooms] = React.useState(0);
+  const [adults, setAdults] = React.useState(0);
+  const [children, setChildren] = React.useState(0);
 
-  // const handleWays = (event) => {
-  //   setWay(event.target.value);
-  //   dispatch(setWay({ way }));
-  // };
+  React.useEffect(() => {
+    if (preferredMode === "dark") {
+      setBgcolor("black");
+      setContainerColor(grey[900]);
+    }
+    console.log(bgcolor);
+  }, []);
 
-  function save() {
-    // dispatch(setLocation({ departure, destination }));
-    // dispatch(setWay({ way }));
+  function handleClose() {
+    dispatch(setHotel({ room: room, adults: adults, children: children }));
     setModalOpen(false);
     setHotelDetails(true);
   }
 
-  function removeRooms(){
-    if(room > 0){
-      setRooms(room-1);
+  function removeRooms() {
+    if (room > 0) {
+      setRooms(room - 1);
     }
   }
 
-  function addRooms(){
-    setRooms(room+1);
+  function addRooms() {
+    setRooms(room + 1);
+  }
+
+  function removeAdults() {
+    if (adults > 0) {
+      setAdults(adults - 1);
+    }
+  }
+  function removeChildren() {
+    if (children > 0) {
+      setChildren(children - 1);
+    }
+  }
+  function addAdults() {
+    setAdults(adults + 1);
+  }
+  function addChildren() {
+    setChildren(children + 1);
   }
 
 
   return (
-    <div className="modalBackground">
-      <div className="modalContainer">
+    // <div className="modalBackground" style={{ backgroundColor: bgcolor }}>
+    <Modal
+        open={true}
+        onClose={handleClose}
+        aria-labelledby="parent-modal-title"
+        aria-describedby="parent-modal-description"
+      >
+      
+      <div
+        className="modalContainer modalBackground"
+        style={{ backgroundColor: containerColor }}
+      > 
+
         <div className="title">
-          <h2
+          <h3
             style={{
               fontSize: "25pt",
-              color: pink[400],
             }}
           >
             Hotel&nbsp;&nbsp;&nbsp;&nbsp;Details
-          </h2>
+          </h3>
         </div>
         <div className="contentBox">
           <div className="formBox">
             <form>
               <Box>
                 <div className="inputContainer">
-                  
-                  <Box display="flex" flexDirection="row">
-                    <h4>Room Quantity</h4>
-                    <RemoveCircleOutlineIcon sx={{ color: pink[500] }} onClick={removeRooms} />
-                    {room}
-                    <AddCircleIcon  sx={{ color: pink[500] }}  onClick={addRooms}/>
-                   
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    textAlign="center"
+                    alignItems="center"
+                  >
+                    <span style={{ marginLeft: "0px" }}>Room Quantity</span>
+                    &nbsp;
+                    <RemoveCircleOutlineIcon
+                      sx={{ color: pink[500] }}
+                      onClick={removeRooms}
+                    />
+                    &nbsp;
+                    {room}&nbsp;
+                    <AddCircleIcon
+                      sx={{ color: pink[500] }}
+                      onClick={addRooms}
+                    />
                   </Box>
-                  
-                  <FormControl style={{ marginTop: "20px" }}>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    textAlign="center"
+                    alignItems="center"
+                    marginTop="30px"
+                  >
+                    <span>Adults</span>&nbsp;
+                    <RemoveCircleOutlineIcon
+                      sx={{ color: pink[500] }}
+                      onClick={removeAdults}
+                    />
+                    &nbsp;
+                    {adults}&nbsp;
+                    <AddCircleIcon
+                      sx={{ color: pink[500] }}
+                      onClick={addAdults}
+                    />&nbsp;
+                    <span>Children</span>&nbsp;
+                    <RemoveCircleOutlineIcon
+                      sx={{ color: pink[500] }}
+                      onClick={removeChildren}
+                    />&nbsp;
+                    {children}&nbsp;
+                    <AddCircleIcon
+                      sx={{ color: pink[500] }}
+                      onClick={addChildren}
+                    />
+                  </Box>
+
+                  <FormControl style={{ marginTop: "40px" }}>
                     <Location
                       placeholder={"Departure"}
                       defaultValue={departure.description}
@@ -249,7 +309,7 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
                     type="submit"
                     id="bt-register"
                     style={{ marginTop: "80px" }}
-                    onClick={save}
+                    onClick={handleClose}
                   >
                     Save
                   </button>
@@ -259,7 +319,7 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
           </div>
         </div>
       </div>
-    </div>
+      </Modal>
   );
 }
 

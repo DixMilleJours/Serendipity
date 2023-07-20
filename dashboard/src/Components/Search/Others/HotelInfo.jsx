@@ -1,9 +1,12 @@
-import React from 'react'
+import React from "react";
+import { useSelector } from "react-redux";
 
-function HotelInfo() {
+function HotelInfo({setModalOpen}) {
+  const hotels = useSelector((state) => state.hotels);
+
   return (
-    <div>HotelInfo</div>
-  )
+    <div>Hotel Info</div>
+  );
 }
 
-export default HotelInfo
+export default HotelInfo;

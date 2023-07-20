@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, TextField } from "@mui/material/";
+import { blueGrey } from "@mui/material/colors";
 import { Bounce } from "../../Animations/Bounce";
 import Departure from "./Others/Departure";
 import Destination from "./Others/Destination";
@@ -11,18 +12,19 @@ import { styled } from "@mui/material/styles";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import TravelDetails from "./Others/TravelDetails";
 import HotelDetails from "./Others/HotelDetails";
 import TravelInfo from "./Others/TravelInfo";
 import HotelInfo from "./Others/HotelInfo";
-import { useDispatch } from "react-redux";
 import { useAuth } from "../../AuthContext";
 import SendIcon from "@mui/icons-material/Send";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
-import { setLocation, setOpenState } from "../../state";
+import { useSelector, useDispatch } from "react-redux";
+import { setLocation } from "../../state";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -44,10 +46,19 @@ function SearchBar({ loggedin }) {
   const [price, setPrice] = React.useState([3000, 6000]);
   const [isModalOpen, setModalOpen] = React.useState(false);
   const [isTravelDetails, setTravelDetails] = React.useState(false);
-  // const [isHotelModalOpen, setHotelModalOpen] = React.useState(false);
+  const [isTravelModalOpen, setTravelModalOpen] = React.useState(false);
   const [isHotelDetails, setHotelDetails] = React.useState(false);
+  const [iconColor, setIconColor] = React.useState(blueGrey[500]);
 
   const dispatch = useDispatch();
+  const travels = useSelector((state) => state.travels);
+  const hotels = useSelector((state) => state.hotels);
+  const defaultDestination = useSelector((state) => state.destination);
+  const defaultDeparture = useSelector((state) => state.departure);
+
+  function setEditorColor() {
+    setIconColor(blueGrey[900]);
+  }
 
   async function generateTrip(e) {
     e.preventDefault();
@@ -146,9 +157,9 @@ function SearchBar({ loggedin }) {
       )}
       {isLoading && loggedin && (
         <React.Fragment>
-          {isModalOpen && !isTravelDetails && (
+          {isTravelModalOpen && !isTravelDetails && (
             <TravelDetails
-              setModalOpen={setModalOpen}
+              setTravelModalOpen={setTravelModalOpen}
               setTravelDetails={setTravelDetails}
             />
           )}
@@ -158,7 +169,7 @@ function SearchBar({ loggedin }) {
               setHotelDetails={setHotelDetails}
             />
           )}
-          {!isModalOpen && (
+          {!isModalOpen && !isTravelModalOpen && (
             <div
               className="contentBox"
               style={{
@@ -180,11 +191,13 @@ function SearchBar({ loggedin }) {
                         <Departure
                           placeholder={"Departure"}
                           setDeparture={setDeparture}
+                          defaultValue={defaultDeparture.description}
                         />
                         <Destination
                           placeholder={"Destination"}
                           setDestination={setDestination}
                           marginLeft={"5px"}
+                          defaultValue={defaultDestination.description}
                         />
                       </Item>
                     </Grid>
@@ -222,7 +235,7 @@ function SearchBar({ loggedin }) {
                             }}
                             variant="contained"
                             onClick={() => {
-                              setModalOpen(true);
+                              setTravelModalOpen(true);
                               dispatch(setLocation({ departure, destination }));
                             }}
                           >
@@ -230,30 +243,74 @@ function SearchBar({ loggedin }) {
                           </Button>
                         )}
                         {/* ===== Parse Contents, Editor Button ===== */}
-                        {isTravelDetails && <TravelInfo />}
+                        {isTravelDetails && (
+                          <Box
+                            sx={{
+                              marginLeft: "20px",
+                              textAlign: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <TravelInfo
+                              setTravelModalOpen={setTravelModalOpen}
+                            />
+                            <EditNoteIcon
+                              style={{ cursor: "pointer", color: iconColor }}
+                              onClick={() => {
+                                setTravelModalOpen(true);
+                                setTravelDetails(false);
+                                dispatch(
+                                  setLocation({ departure: departure, destination: destination })
+                                );
+                              }}
+                            />
+                          </Box>
+                        )}
                       </Item>
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <BasicRating rate={rate} setRating={setRating} />
+                        <BasicRating setRating={setRating} />
                         {!isHotelDetails && (
                           <Button
                             sx={{
+                              marginLeft: "50px",
                               width: "150px",
                               textAlign: "center",
                               alignContent: "center",
-                              marginLeft: "120px",
                             }}
                             variant="contained"
                             onClick={() => {
                               setModalOpen(true);
-                              dispatch(setLocation({ departure, destination }));
+                              dispatch(setLocation({ departure: departure, destination: destination }));
                             }}
                           >
                             Hotel Details
                           </Button>
                         )}
-                         {isHotelDetails && <HotelInfo />}
+
+                        {isHotelDetails && (
+                          <Box
+                            sx={{
+                              marginLeft: "20px",
+                              textAlign: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <HotelInfo />
+                            <EditNoteIcon
+                              style={{ cursor: "pointer", color: iconColor }}
+                              onMouseHover={setEditorColor}
+                              onClick={() => {
+                                setModalOpen(true);
+                                setHotelDetails(false);
+                                dispatch(
+                                  setLocation({ departure, destination })
+                                );
+                              }}
+                            />
+                          </Box>
+                        )}
                       </Item>
                     </Grid>
                     {/* Temporary Addition */}

@@ -87,6 +87,7 @@ function Navigation({ loggedin, username }) {
     }
   };
 
+ 
   React.useEffect(() => {
     if (windowWidth <= 444) {
       window.resizeTo(444, window.innerHeight);
@@ -100,7 +101,7 @@ function Navigation({ loggedin, username }) {
       <FlexDisplay padding="1rem 6%" backgroundColor={alt}>
         <FlexDisplay gap="1.75rem">
           {/* Edit Logo here ... */}
-          <img src={Logo} width="100px" height="80px" />{" "}
+          <img src={Logo} width="60px" height="60px" />{" "}
           <Typography
             fontSize="clamp(1rem, 2rem, 2.25rem)"
             color="primary"
@@ -109,7 +110,9 @@ function Navigation({ loggedin, username }) {
               "&:hover": {
                 color: primaryLight,
                 cursor: "pointer",
+                
               },
+              // fontFamily:"Nunito"
             }}
           >
             Serendipity

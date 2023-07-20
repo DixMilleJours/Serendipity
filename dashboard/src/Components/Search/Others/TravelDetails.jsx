@@ -1,4 +1,4 @@
-import { pink } from "@mui/material/colors";
+import { pink, grey } from "@mui/material/colors";
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -18,16 +18,13 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import Departure from "./Departure";
-import Destination from "./Destination";
+import Modal from "@mui/material/Modal";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { useSelector, useDispatch } from "react-redux";
-import { setLocation, setWay } from "../../../state";
+import { setLocation, setTravel } from "../../../state";
 import "../../../static/css/modal.css";
 import "../../../static/css/login.css";
-import { Button } from "@mui/material";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyC6ypOzv4pxq3lM4SbI5Mh7MlnJUapoZuQ";
 
@@ -172,58 +169,78 @@ function Location({ placeholder, defaultValue }) {
   );
 }
 
-
-
-
-function TravelDetails({ setTravelDetails, setModalOpen  }) {
+function TravelDetails({ setTravelModalOpen, setTravelDetails }) {
+  const preferredMode = useSelector((state) => state.mode);
+  const [bgcolor, setBgcolor] = React.useState("");
+  const [containerColor, setContainerColor] = React.useState("");
   const dispatch = useDispatch();
   const departure = useSelector((state) => state.departure);
   const destination = useSelector((state) => state.destination);
   const [way, setWay] = React.useState("");
+  const [classOption, setClassOption] = React.useState("")
   const [adults, setAdults] = React.useState(0);
   const [children, setChildren] = React.useState(0);
 
+  React.useEffect(() => {
+    if (preferredMode === "dark") {
+      setBgcolor("black");
+      setContainerColor(grey[900]);
+    }
+  }, []);
+
   const handleWays = (event) => {
     setWay(event.target.value);
-    // dispatch(setWay({ way }));
   };
 
-  function save() {
+  const handleClass = (event) => {
+    setClassOption(event.target.value);
+  };
+
+  function handleClose() {
     // dispatch(setLocation({ departure, destination }));
-    // dispatch(setWay({ way }));
-    setModalOpen(false);
+    dispatch(setTravel({ way: way, classOption: classOption, adults: adults, children: children }));
+    setTravelModalOpen(false);
     setTravelDetails(true);
   }
 
-  function removeAdults(){
-    if(adults > 0){
-      setAdults(adults-1);
+  function removeAdults() {
+    if (adults > 0) {
+      setAdults(adults - 1);
     }
   }
-  function removeChildren(){
-    if(children > 0){
-      setChildren(children-1);
+  function removeChildren() {
+    if (children > 0) {
+      setChildren(children - 1);
     }
   }
-  function addAdults(){
-    setAdults(adults+1);
+  function addAdults() {
+    setAdults(adults + 1);
   }
-  function addChildren(){
-    setChildren(children+1);
+  function addChildren() {
+    setChildren(children + 1);
   }
 
+  console.log(preferredMode);
+
   return (
-    <div className="modalBackground">
-      <div className="modalContainer">
+    <Modal
+        open={true}
+        onClose={handleClose}
+        aria-labelledby="parent-modal-title"
+        aria-describedby="parent-modal-description"
+      >
+      <div
+        className="modalContainer modalBackground"
+        style={{ backgroundColor: containerColor }}
+      >
         <div className="title">
-          <h2
+          <h3
             style={{
               fontSize: "25pt",
-              color: pink[400],
             }}
           >
             Travel&nbsp;&nbsp;&nbsp;&nbsp;Details
-          </h2>
+          </h3>
         </div>
         <div className="contentBox">
           <div className="formBox">
@@ -235,29 +252,59 @@ function TravelDetails({ setTravelDetails, setModalOpen  }) {
                       row
                       aria-labelledby="demo-row-radio-buttons-group-label"
                       name="row-radio-buttons-group"
+                      value={classOption}
+                      onChange={handleClass}
                     >
                       <FormControlLabel
-                        value="Economy"
+                        value="ECONOMY"
                         control={<Radio />}
                         label="Economy"
                       />
                       <FormControlLabel
-                        value="Business"
+                        value="PREMIUM_ECONOMY"
+                        control={<Radio />}
+                        label="Premium"
+                      />
+                      <FormControlLabel
+                        value="BUSINESS"
                         control={<Radio />}
                         label="Business"
                       />
+                      <FormControlLabel
+                        value="FIRST"
+                        control={<Radio />}
+                        label="First"
+                      />
                     </RadioGroup>
                   </FormControl>
-                  <Box display="flex" flexDirection="row">
-                    <h4>Adults</h4>
-                    <RemoveCircleOutlineIcon sx={{ color: pink[500] }} onClick={removeAdults} />
-                    {adults}
-                    <AddCircleIcon  sx={{ color: pink[500] }}  onClick={addAdults}/>
-                   
-                    <h4>Children</h4>
-                    <RemoveCircleOutlineIcon sx={{ color: pink[500] }} onClick={removeChildren}/>
-                    {children}
-                    <AddCircleIcon sx={{ color: pink[500] }} onClick={addChildren}/>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    textAlign="center"
+                    alignItems="center"
+                    marginTop="30px"
+                  >
+                    <span>Adults</span>&nbsp;
+                    <RemoveCircleOutlineIcon
+                      sx={{ color: pink[500] }}
+                      onClick={removeAdults}
+                    />
+                    &nbsp;
+                    {adults}&nbsp;
+                    <AddCircleIcon
+                      sx={{ color: pink[500] }}
+                      onClick={addAdults}
+                    />&nbsp;
+                    <span>Children</span>&nbsp;
+                    <RemoveCircleOutlineIcon
+                      sx={{ color: pink[500] }}
+                      onClick={removeChildren}
+                    />&nbsp;
+                    {children}&nbsp;
+                    <AddCircleIcon
+                      sx={{ color: pink[500] }}
+                      onClick={addChildren}
+                    />
                   </Box>
                   <FormControl
                     variant="outlined"
@@ -297,7 +344,7 @@ function TravelDetails({ setTravelDetails, setModalOpen  }) {
                     type="submit"
                     id="bt-register"
                     style={{ marginTop: "80px" }}
-                    onClick={save}
+                    onClick={handleClose}
                   >
                     Save
                   </button>
@@ -307,7 +354,7 @@ function TravelDetails({ setTravelDetails, setModalOpen  }) {
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

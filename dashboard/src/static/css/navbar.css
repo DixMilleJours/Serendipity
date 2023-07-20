@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
 .navbar .navbar-nav .nav-link {
-  font-family: 'Noto Sans';
+  font-family: 'Nunito';
   font-size: 16pt;
   font-weight: bold;
 }

@@ -6,8 +6,8 @@ const initialState = {
   token: null,
   departure: null,
   destination: null,
-  way: null,
-  posts: [],
+  travels: [],
+  hotels: [],
 };
 
 export const authSlice = createSlice({
@@ -29,12 +29,21 @@ export const authSlice = createSlice({
       state.departure = action.payload.departure;
       state.destination = action.payload.destination;
     },
-    setWay:(state, action) =>{
-      state.way = action.payload.way;
+    setTravel: (state, action) => {
+      state.travels[0] = action.payload.way;
+      state.travels[1] = action.payload.classOption;
+      state.travels[2] = action.payload.adults;
+      state.travels[3] = action.payload.children;
     },
+    setHotel: (state, action) => {
+      state.travels[0] = action.payload.room;
+      state.travels[1] = action.payload.adults;
+      state.travels[2] = action.payload.children;
+    },
+    
   },
 });
 
-export const { setMode, setLogin, setLogout, setLocation, setWay } =
+export const { setMode, setLogin, setLogout, setLocation, setTravel, setHotel } =
   authSlice.actions;
 export default authSlice.reducer;
