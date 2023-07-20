@@ -22,21 +22,20 @@ body {
 }
 
 .modalContainer {
-  width: 500px;
-  height: 500px;
+  width: 800px;
+  height: 800px;
   border-radius: 12px;
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   display: flex;
   flex-direction: column;
-  padding: 25px;
+  padding: 45px;
 
 }
 
 .modalContainer .title {
   display: inline-block;
   text-align: center;
-  margin-top: 10px;
 }
 
 .emailContainer {
@@ -74,7 +73,6 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-around;
-  padding: 20px;
 
 }
 
@@ -86,7 +84,7 @@ body {
   cursor: pointer;
 }
 
-.recoveryBtn {
+.saveBtn {
   width: 150px;
   height: 45px;
   margin: 60px;

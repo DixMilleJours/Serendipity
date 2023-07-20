@@ -6,6 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoutes from './ProtectedRoutes';
 import Home from './Components/Index/Home';
+import TravelDetails from './Components/Search/Others/TravelDetails';
 import { useSelector } from "react-redux";
 import { themeSettings } from './theme';
 import { AuthProvider } from './AuthContext';
@@ -40,6 +41,7 @@ function App() {
                 {/* <Route element={<ProtectedRoutes />}> */}
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
+                <Route path='/home/travel' element= {<TravelDetails/>} />
                 {/* </Route> */}
                 <Route path="*" element={<Navigate to='/404' />} />
               </Routes>

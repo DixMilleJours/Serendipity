@@ -5,6 +5,12 @@ import { styled } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
 
+const marks = [
+  {value:1000, label:"$1k"},
+  {value:5000, label:"$5k"},
+  {value:10000, label:"$10k"}
+]
+
 const AirbnbSlider = styled(Slider)(({ theme }) => ({
   height: 3,
   padding: "13px 0",
@@ -60,9 +66,9 @@ AirbnbThumbComponent.propTypes = {
   children: PropTypes.node,
 };
 
-export default function CustomizedSlider({setPrice}) {
+export default function CustomizedSlider({setPrice, price}) {
   return (
-    <Box sx={{ width: "250px", marginTop:"25px" }}>
+    <Box sx={{ width: "250px", marginTop:"25px", marginLeft:"10px" }}>
       <AirbnbSlider
         slots={{ thumb: AirbnbThumbComponent }}
         onChange={(event, newValue) => {
@@ -71,11 +77,12 @@ export default function CustomizedSlider({setPrice}) {
         min={1000}
         step={1000}
         max={10000}
-        valueLabelDisplay="on"
+        valueLabelDisplay="auto"
         getAriaLabel={(index) =>
           index === 0 ? "Minimum price" : "Maximum price"
         }
-        defaultValue={[3000, 6000]}
+        defaultValue={[price[0], price[1]]}
+        marks={marks}
       />
     </Box>
   );

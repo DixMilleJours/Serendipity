@@ -24,6 +24,18 @@
     left: 0px;
 }
 
+h3{
+    margin-left: 1px;
+    text-align: left;
+    color: #607d8b;
+    font-weight: 600;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border-bottom: 4px solid #ff4584;
+    display: inline-block;
+    letter-spacing: 1px;
+}
 
 .contentBox h3 {
     margin-left: 1px;

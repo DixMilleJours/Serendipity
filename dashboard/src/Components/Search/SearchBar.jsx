@@ -1,23 +1,37 @@
 import React from "react";
 import { Button, TextField } from "@mui/material/";
+import { blueGrey } from "@mui/material/colors";
 import { Bounce } from "../../Animations/Bounce";
 import Departure from "./Others/Departure";
 import Destination from "./Others/Destination";
 import CustomizedSlider from "./Others/Budget";
 import BasicRating from "./Others/Hotel";
+import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled } from "@mui/material/styles";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import TravelDetails from "./Others/TravelDetails";
+import HotelDetails from "./Others/HotelDetails";
+import TravelInfo from "./Others/TravelInfo";
+import HotelInfo from "./Others/HotelInfo";
 import { useAuth } from "../../AuthContext";
 import SendIcon from "@mui/icons-material/Send";
+import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
-import { httpsCallable, getFunctions, connectFunctionsEmulator } from "firebase/functions"
-import { getApp } from "firebase/app"
+import { useSelector, useDispatch } from "react-redux";
+import { setLocation } from "../../state";
+import {
+  httpsCallable,
+  getFunctions,
+  connectFunctionsEmulator,
+} from "firebase/functions";
+import { getApp } from "firebase/app";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -28,15 +42,31 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-function SearchBar(loggedin) {
+function SearchBar({ loggedin, setError }) {
   const [isLoading, setLoading] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
   const [destination, setDestination] = React.useState("");
   const [departure, setDeparture] = React.useState("");
-  const [oStartDate, setStartDate] = React.useState(dayjs(""));
-  const [oEndDate, setEndDate] = React.useState(dayjs(""));
+  const [oStartDate, setStartDate] = React.useState(dayjs(dayjs().toDate()));
+  const [oEndDate, setEndDate] = React.useState(dayjs(dayjs().toDate()));
   const [rate, setRating] = React.useState(5);
   const [price, setPrice] = React.useState([3000, 6000]);
+  const [isModalOpen, setModalOpen] = React.useState(false);
+  const [isTravelDetails, setTravelDetails] = React.useState(false);
+  const [isTravelModalOpen, setTravelModalOpen] = React.useState(false);
+  const [isHotelDetails, setHotelDetails] = React.useState(false);
+  const [iconColor, setIconColor] = React.useState(blueGrey[500]);
+
+  const dispatch = useDispatch();
+  const defaultDestination = useSelector((state) => state.destination);
+  const defaultDeparture = useSelector((state) => state.departure);
+
+  const travels = useSelector((state) => state.travels); // array
+  const hotels = useSelector((state) => state.hotels); // array
+
+  function setEditorColor() {
+    setIconColor(blueGrey[900]);
+  }
 
   async function generateTrip(e) {
     e.preventDefault();
@@ -52,6 +82,8 @@ function SearchBar(loggedin) {
         endDate,
         rate,
         price,
+        travels,
+        hotels,
       };
       console.log(tripValue);
       try {
@@ -65,9 +97,11 @@ function SearchBar(loggedin) {
 
   // Testing connection to back-end
   const [storage, setStorage] = React.useState();
+  let navigate = useNavigate();
 
   const handleClick = async () => {
     // reset storage
+    setStorage();
     setStorage();
 
     const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
@@ -106,6 +140,7 @@ function SearchBar(loggedin) {
       //setOptimalFlight(optimalFlight); // Store the result in state
     } catch (error) {
       console.error(error);
+      console.error(error);
     }
   };
 
@@ -123,7 +158,7 @@ function SearchBar(loggedin) {
               marginRight: "0px",
             }}
             onClick={() => {
-              if (loggedin.loggedin == true) {
+              if (loggedin == true) {
                 setLoading(true);
                 setVisible(false);
               }
@@ -134,179 +169,313 @@ function SearchBar(loggedin) {
         </Bounce>
       )}
       {isLoading && loggedin && (
-        <div
-          className="contentBox"
-          style={{
-            marginTop: "50px",
-          }}
-        >
-          <div className="formBox">
-            <form>
-              {/* <Box sx={{ flexGrow: 1 }}> */}
-              <Grid container spacing={2.5}>
-                <Grid xs={6} flexDirection="row">
-                  <Item
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginRight: "2px",
-                    }}
-                  >
-                    <Departure
-                      placeholder={"Departure"}
-                      setDeparture={setDeparture}
-                    />
-                    <Destination
-                      placeholder={"Destination"}
-                      setDestination={setDestination}
-                      marginLeft={"5px"}
-                    />
-                  </Item>
-                </Grid>
-                <Grid xs={3}>
-                  <Item>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Start date"
-                        onChange={(newValue) => setStartDate(newValue)}
-                      />
-                    </LocalizationProvider>
-                  </Item>
-                </Grid>
-                <Grid xs={3}>
-                  <Item>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="End date"
-                        onChange={(newValue) => setEndDate(newValue)}
-                      />
-                    </LocalizationProvider>
-                  </Item>
-                </Grid>
-                <Grid xs={6}>
-                  <Item style={{ display: "flex", flexDirection: "row" }}>
-                    <CustomizedSlider setPrice={setPrice} />
-                    <Button
-                      sx={{
-                        width: "150px",
-                        textAlign: "center",
-                        alignContent: "center",
-                        marginLeft: "65px",
-                      }}
-                      variant="contained"
-                    >
-                      Travel Details
-                    </Button>
-                  </Item>
-                </Grid>
-                <Grid xs={6}>
-                  <Item style={{ display: "flex", flexDirection: "row" }}>
-                    <BasicRating rate={rate} setRating={setRating} />
-                    <Button
-                      sx={{
-                        width: "150px",
-                        textAlign: "center",
-                        alignContent: "center",
-                        marginLeft: "120px",
-                      }}
-                      variant="contained"
-                    >
-                      Hotel Details
-                    </Button>
-                  </Item>
-                </Grid>
-                {/* Temporary Addition */}
-                <Grid xs={6}>
-                  <Item style={{ display: "flex", flexDirection: "row" }}>
-                    <TextField
-                      label="Departure"
-                      onChange={(event) => {
-                        setDeparture(event.target.value);
-                      }}
-                    ></TextField>
-                  </Item>
-                </Grid>
-                <Grid xs={6}>
-                  <Item style={{ display: "flex", flexDirection: "row" }}>
-                    <TextField
-                      label="Destination"
-                      onChange={(event) => {
-                        setDestination(event.target.value);
-                      }}
-                    ></TextField>
-                  </Item>
-                </Grid>
-              </Grid>
-              {/* </Box> */}
-              <Button
-                sx={{
-                  width: "150px",
-                  marginTop: "50px",
-                  textAlign: "center",
-                  alignContent: "center",
-                }}
-                variant="contained"
-                endIcon={<SendIcon />}
-                onClick={handleClick}
-              >
-                Let's go!
-              </Button>
-              {storage && (
-                <Grid container spacing={2.5}>
-                  <Grid xs={12} flexDirection="row">
-                    <Item
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        marginRight: "2px",
-                      }}
-                    >
-                      <div>
-                        <h2>Results found...</h2>
-                        {storage.map((item, index) => {
-                          return (
-                            <div key={index}>
-                              <h3>Flight {index + 1}</h3>
-                              <p>
-                                {item.owner.name}
-                                <img
-                                  src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
-                                  width={24}
-                                  height={24}
-                                />
-                                {item.total_amount + " " + item.total_currency}
-                              </p>
+        <React.Fragment>
+          {isTravelModalOpen && !isTravelDetails && (
+            <TravelDetails
+              setTravelModalOpen={setTravelModalOpen}
+              setTravelDetails={setTravelDetails}
+            />
+          )}
+          {isModalOpen && !isHotelDetails && (
+            <HotelDetails
+              setModalOpen={setModalOpen}
+              setHotelDetails={setHotelDetails}
+            />
+          )}
+          {!isModalOpen && !isTravelModalOpen && (
+            <div
+              className="contentBox"
+              style={{
+                marginTop: "50px",
+              }}
+            >
+              <div className="formBox">
+                <form>
+                  {/* <Box sx={{ flexGrow: 1 }}> */}
+                  <Grid container spacing={2.5}>
+                    <Grid xs={6} flexDirection="row">
+                      <Item
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          marginRight: "2px",
+                        }}
+                      >
+                        <Departure
+                          placeholder={"Departure"}
+                          setDeparture={setDeparture}
+                          defaultValue={defaultDeparture}
+                        />
+                        <Destination
+                          placeholder={"Destination"}
+                          setDestination={setDestination}
+                          marginLeft={"5px"}
+                          defaultValue={defaultDestination}
+                        />
+                      </Item>
+                    </Grid>
+                    <Grid xs={3}>
+                      <Item>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            label="Start date"
+                            value={oStartDate}
+                            onChange={(newValue) => setStartDate(newValue)}
+                          />
+                        </LocalizationProvider>
+                      </Item>
+                    </Grid>
+                    <Grid xs={3}>
+                      <Item>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            label="End date"
+                            value={oEndDate}
+                            onChange={(newValue) => setEndDate(newValue)}
+                          />
+                        </LocalizationProvider>
+                      </Item>
+                    </Grid>
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <CustomizedSlider setPrice={setPrice} price={price} />
+                        {/* ===== Travel Details Button ===== */}
+                        {!isTravelDetails && (
+                          <Button
+                            sx={{
+                              width: "150px",
+                              textAlign: "center",
+                              alignContent: "center",
+                              marginLeft: "65px",
+                            }}
+                            variant="contained"
+                            onClick={() => {
+                              if (departure === null || destination === null) {
+                                setError(true);
+                              } else {
+                                setTravelModalOpen(true);
+                                setTravelDetails(false);
+                                dispatch(
+                                  setLocation({
+                                    departure: departure,
+                                    destination: destination,
+                                  })
+                                );
+                              }
+                            }}
+                          >
+                            Travel Details
+                          </Button>
+                        )}
+                        {/* ===== Parse Contents, Editor Button ===== */}
+                        {isTravelDetails && (
+                          <React.Fragment>
+                            <Box
+                              sx={{
+                                marginTop: "15px",
+                                marginLeft: "20px",
+                                textAlign: "center",
+                                alignItems: "center",
+                                pl: 2,
+                              }}
+                            >
+                              <TravelInfo
+                                setTravelModalOpen={setTravelModalOpen}
+                              />
+                            </Box>
+                            <Box sx={{ marginTop: "50px" }}>
+                              <EditNoteIcon
+                                style={{ cursor: "pointer", color: iconColor }}
+                                onClick={() => {
+                                  if (
+                                    departure === null ||
+                                    destination === null
+                                  ) {
+                                    setError(true);
+                                  } else {
+                                    setTravelModalOpen(true);
+                                    setTravelDetails(false);
+                                    dispatch(
+                                      setLocation({
+                                        departure: departure,
+                                        destination: destination,
+                                      })
+                                    );
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </React.Fragment>
+                        )}
+                      </Item>
+                    </Grid>
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <BasicRating setRating={setRating} rate={rate} />
+                        {!isHotelDetails && (
+                          <Button
+                            sx={{
+                              marginLeft: "50px",
+                              width: "150px",
+                              textAlign: "center",
+                              alignContent: "center",
+                            }}
+                            variant="contained"
+                            onClick={() => {
+                              if (departure === null || destination === null) {
+                                setError(true);
+                              } else {
+                                setModalOpen(true);
+                                setHotelDetails(false);
+                                dispatch(
+                                  setLocation({
+                                    departure: departure,
+                                    destination: destination,
+                                  })
+                                );
+                              }
+                            }}
+                          >
+                            Hotel Details
+                          </Button>
+                        )}
 
-                              <p>
-                                {formatDateTime(
-                                  item.slices[0].segments[0].departing_at
-                                )}
-                                <hr width="10px"></hr>
-                                {formatDateTime(
-                                  item.slices[0].segments[0].arriving_at
-                                )}
-                              </p>
-                              <hr></hr>
-                              <p>
-                                {formatDateTime(
-                                  item.slices[1].segments[0].departing_at
-                                )}
-                                <hr width="10px"></hr>
-                                {formatDateTime(
-                                  item.slices[1].segments[0].arriving_at
-                                )}
-                              </p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </Item>
+                        {isHotelDetails && (
+                          <React.Fragment>
+                            <Box
+                              sx={{
+                                marginLeft: "40px",
+                                marginTop: "15px",
+                                textAlign: "center",
+                                alignItems: "center",
+                                pl: 2,
+                              }}
+                            >
+                              <HotelInfo />
+                            </Box>
+                            <Box sx={{ marginTop: "50px" }}>
+                              <EditNoteIcon
+                                style={{ cursor: "pointer", color: iconColor }}
+                                onMouseHover={setEditorColor}
+                                onClick={() => {
+                                  if (
+                                    departure === null ||
+                                    destination === null
+                                  ) {
+                                    setError(true);
+                                  } else {
+                                    setModalOpen(true);
+                                    setHotelDetails(false);
+                                    dispatch(
+                                      setLocation({
+                                        departure: departure,
+                                        destination: destination,
+                                      })
+                                    );
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </React.Fragment>
+                        )}
+                      </Item>
+                    </Grid>
+                    {/* Temporary Addition */}
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <TextField
+                          label="Departure"
+                          onChange={(event) => {
+                            setDeparture(event.target.value);
+                          }}
+                        ></TextField>
+                      </Item>
+                    </Grid>
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <TextField
+                          label="Destination"
+                          onChange={(event) => {
+                            setDestination(event.target.value);
+                          }}
+                        ></TextField>
+                      </Item>
+                    </Grid>
                   </Grid>
-                </Grid>
-              )}
-            </form>
-          </div>
-        </div>
+                  {/* </Box> */}
+                  <Button
+                    sx={{
+                      width: "150px",
+                      marginTop: "50px",
+                      textAlign: "center",
+                      alignContent: "center",
+                    }}
+                    variant="contained"
+                    endIcon={<SendIcon />}
+                    onClick={handleClick}
+                  >
+                    Let's go!
+                  </Button>
+                  {storage && (
+                    <Grid container spacing={2.5}>
+                      <Grid xs={12} flexDirection="row">
+                        <Item
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            marginRight: "2px",
+                          }}
+                        >
+                          <div>
+                            <h2>Results found...</h2>
+                            {storage.map((item, index) => {
+                              return (
+                                <div key={index}>
+                                  <h3>Flight {index + 1}</h3>
+                                  <p>
+                                    {item.owner.name}
+                                    <img
+                                      src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
+                                      width={24}
+                                      height={24}
+                                    />
+                                    {item.total_amount +
+                                      " " +
+                                      item.total_currency}
+                                  </p>
+
+                                  <p>
+                                    {formatDateTime(
+                                      item.slices[0].segments[0].departing_at
+                                    )}
+                                    <hr width="10px"></hr>
+                                    {formatDateTime(
+                                      item.slices[0].segments[0].arriving_at
+                                    )}
+                                  </p>
+                                  <hr></hr>
+                                  <p>
+                                    {formatDateTime(
+                                      item.slices[1].segments[0].departing_at
+                                    )}
+                                    <hr width="10px"></hr>
+                                    {formatDateTime(
+                                      item.slices[1].segments[0].arriving_at
+                                    )}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Item>
+                      </Grid>
+                    </Grid>
+                  )}
+                </form>
+              </div>
+            </div>
+          )}
+        </React.Fragment>
       )}
     </>
   );
