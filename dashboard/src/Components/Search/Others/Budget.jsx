@@ -66,7 +66,7 @@ AirbnbThumbComponent.propTypes = {
   children: PropTypes.node,
 };
 
-export default function CustomizedSlider({setPrice}) {
+export default function CustomizedSlider({setPrice, price}) {
   return (
     <Box sx={{ width: "250px", marginTop:"25px", marginLeft:"10px" }}>
       <AirbnbSlider
@@ -81,7 +81,7 @@ export default function CustomizedSlider({setPrice}) {
         getAriaLabel={(index) =>
           index === 0 ? "Minimum price" : "Maximum price"
         }
-        defaultValue={[3000, 6000]}
+        defaultValue={[price[0], price[1]]}
         marks={marks}
       />
     </Box>

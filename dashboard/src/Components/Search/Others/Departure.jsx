@@ -63,7 +63,7 @@ export default function Departure({placeholder, setDeparture, defaultValue}) {
       return undefined;
     }
 
-    if (inputValue === '') {
+    if (inputValue === '' || inputValue === null) {
       setOptions(value ? [value] : []);
       return undefined;
     }

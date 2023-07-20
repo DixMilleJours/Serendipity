@@ -16,9 +16,9 @@ function TravelInfo({ setTravelModalOpen }) {
   return (
     <>
       <Box sx={{alignContent:"center", textAlign: "center",}}>
-        YYZ <FlightTakeoffIcon /> YYC
-        <GroupIcon /> {travels[2]}
-        <ChildFriendlyIcon /> {travels[3]}
+        YYZ&nbsp; <FlightTakeoffIcon />&nbsp; YYC&nbsp;
+        <GroupIcon /> {travels[2]}&nbsp;
+        <ChildFriendlyIcon /> {travels[3]}&nbsp;
       </Box>
     </>
   );

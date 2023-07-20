@@ -19,6 +19,7 @@ import TravelInfo from "./Others/TravelInfo";
 import HotelInfo from "./Others/HotelInfo";
 import { useAuth } from "../../AuthContext";
 import SendIcon from "@mui/icons-material/Send";
+import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
@@ -35,13 +36,13 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-function SearchBar({ loggedin }) {
+function SearchBar({ loggedin, setError }) {
   const [isLoading, setLoading] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
   const [destination, setDestination] = React.useState("");
   const [departure, setDeparture] = React.useState("");
-  const [oStartDate, setStartDate] = React.useState(dayjs(""));
-  const [oEndDate, setEndDate] = React.useState(dayjs(""));
+  const [oStartDate, setStartDate] = React.useState(dayjs(dayjs().toDate()));
+  const [oEndDate, setEndDate] = React.useState(dayjs(dayjs().toDate()));
   const [rate, setRating] = React.useState(5);
   const [price, setPrice] = React.useState([3000, 6000]);
   const [isModalOpen, setModalOpen] = React.useState(false);
@@ -51,10 +52,11 @@ function SearchBar({ loggedin }) {
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
 
   const dispatch = useDispatch();
-  const travels = useSelector((state) => state.travels);
-  const hotels = useSelector((state) => state.hotels);
   const defaultDestination = useSelector((state) => state.destination);
   const defaultDeparture = useSelector((state) => state.departure);
+
+  const travels = useSelector((state) => state.travels); // array
+  const hotels = useSelector((state) => state.hotels); // array
 
   function setEditorColor() {
     setIconColor(blueGrey[900]);
@@ -74,6 +76,8 @@ function SearchBar({ loggedin }) {
         endDate,
         rate,
         price,
+        travels,
+        hotels,
       };
       console.log(tripValue);
       try {
@@ -130,6 +134,8 @@ function SearchBar({ loggedin }) {
       console.error(error);
     }
   };
+
+  React.useEffect(() => {});
 
   return (
     <>
@@ -191,13 +197,13 @@ function SearchBar({ loggedin }) {
                         <Departure
                           placeholder={"Departure"}
                           setDeparture={setDeparture}
-                          defaultValue={defaultDeparture.description}
+                          defaultValue={defaultDeparture}
                         />
                         <Destination
                           placeholder={"Destination"}
                           setDestination={setDestination}
                           marginLeft={"5px"}
-                          defaultValue={defaultDestination.description}
+                          defaultValue={defaultDestination}
                         />
                       </Item>
                     </Grid>
@@ -206,6 +212,7 @@ function SearchBar({ loggedin }) {
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
                             label="Start date"
+                            value={oStartDate}
                             onChange={(newValue) => setStartDate(newValue)}
                           />
                         </LocalizationProvider>
@@ -216,6 +223,7 @@ function SearchBar({ loggedin }) {
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
                             label="End date"
+                            value={oEndDate}
                             onChange={(newValue) => setEndDate(newValue)}
                           />
                         </LocalizationProvider>
@@ -223,7 +231,7 @@ function SearchBar({ loggedin }) {
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <CustomizedSlider setPrice={setPrice} />
+                        <CustomizedSlider setPrice={setPrice} price={price} />
                         {/* ===== Travel Details Button ===== */}
                         {!isTravelDetails && (
                           <Button
@@ -235,8 +243,18 @@ function SearchBar({ loggedin }) {
                             }}
                             variant="contained"
                             onClick={() => {
-                              setTravelModalOpen(true);
-                              dispatch(setLocation({ departure, destination }));
+                              if (departure === null || destination === null) {
+                                setError(true);
+                              } else {
+                                setTravelModalOpen(true);
+                                setTravelDetails(false);
+                                dispatch(
+                                  setLocation({
+                                    departure: departure,
+                                    destination: destination,
+                                  })
+                                );
+                              }
                             }}
                           >
                             Travel Details
@@ -244,33 +262,49 @@ function SearchBar({ loggedin }) {
                         )}
                         {/* ===== Parse Contents, Editor Button ===== */}
                         {isTravelDetails && (
-                          <Box
-                            sx={{
-                              marginLeft: "20px",
-                              textAlign: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <TravelInfo
-                              setTravelModalOpen={setTravelModalOpen}
-                            />
-                            <EditNoteIcon
-                              style={{ cursor: "pointer", color: iconColor }}
-                              onClick={() => {
-                                setTravelModalOpen(true);
-                                setTravelDetails(false);
-                                dispatch(
-                                  setLocation({ departure: departure, destination: destination })
-                                );
+                          <React.Fragment>
+                            <Box
+                              sx={{
+                                marginTop: "15px",
+                                marginLeft: "20px",
+                                textAlign: "center",
+                                alignItems: "center",
+                                pl: 2,
                               }}
-                            />
-                          </Box>
+                            >
+                              <TravelInfo
+                                setTravelModalOpen={setTravelModalOpen}
+                              />
+                            </Box>
+                            <Box sx={{ marginTop: "50px" }}>
+                              <EditNoteIcon
+                                style={{ cursor: "pointer", color: iconColor }}
+                                onClick={() => {
+                                  if (
+                                    departure === null ||
+                                    destination === null
+                                  ) {
+                                    setError(true);
+                                  } else {
+                                    setTravelModalOpen(true);
+                                    setTravelDetails(false);
+                                    dispatch(
+                                      setLocation({
+                                        departure: departure,
+                                        destination: destination,
+                                      })
+                                    );
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </React.Fragment>
                         )}
                       </Item>
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <BasicRating setRating={setRating} />
+                        <BasicRating setRating={setRating} rate={rate} />
                         {!isHotelDetails && (
                           <Button
                             sx={{
@@ -281,8 +315,18 @@ function SearchBar({ loggedin }) {
                             }}
                             variant="contained"
                             onClick={() => {
-                              setModalOpen(true);
-                              dispatch(setLocation({ departure: departure, destination: destination }));
+                              if (departure === null || destination === null) {
+                                setError(true);
+                              } else {
+                                setModalOpen(true);
+                                setHotelDetails(false);
+                                dispatch(
+                                  setLocation({
+                                    departure: departure,
+                                    destination: destination,
+                                  })
+                                );
+                              }
                             }}
                           >
                             Hotel Details
@@ -290,26 +334,42 @@ function SearchBar({ loggedin }) {
                         )}
 
                         {isHotelDetails && (
-                          <Box
-                            sx={{
-                              marginLeft: "20px",
-                              textAlign: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <HotelInfo />
-                            <EditNoteIcon
-                              style={{ cursor: "pointer", color: iconColor }}
-                              onMouseHover={setEditorColor}
-                              onClick={() => {
-                                setModalOpen(true);
-                                setHotelDetails(false);
-                                dispatch(
-                                  setLocation({ departure, destination })
-                                );
+                          <React.Fragment>
+                            <Box
+                              sx={{
+                                marginLeft: "40px",
+                                marginTop: "15px",
+                                textAlign: "center",
+                                alignItems: "center",
+                                pl: 2,
                               }}
-                            />
-                          </Box>
+                            >
+                              <HotelInfo />
+                            </Box>
+                            <Box sx={{ marginTop: "50px" }}>
+                              <EditNoteIcon
+                                style={{ cursor: "pointer", color: iconColor }}
+                                onMouseHover={setEditorColor}
+                                onClick={() => {
+                                  if (
+                                    departure === null ||
+                                    destination === null
+                                  ) {
+                                    setError(true);
+                                  } else {
+                                    setModalOpen(true);
+                                    setHotelDetails(false);
+                                    dispatch(
+                                      setLocation({
+                                        departure: departure,
+                                        destination: destination,
+                                      })
+                                    );
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </React.Fragment>
                         )}
                       </Item>
                     </Grid>

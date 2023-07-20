@@ -4,8 +4,8 @@ const initialState = {
   mode: "light",
   user: null,
   token: null,
-  departure: null,
-  destination: null,
+  departure: "",
+  destination: "",
   travels: [],
   hotels: [],
 };
@@ -36,9 +36,9 @@ export const authSlice = createSlice({
       state.travels[3] = action.payload.children;
     },
     setHotel: (state, action) => {
-      state.travels[0] = action.payload.room;
-      state.travels[1] = action.payload.adults;
-      state.travels[2] = action.payload.children;
+      state.hotels[0] = action.payload.room;
+      state.hotels[1] = action.payload.adults;
+      state.hotels[2] = action.payload.children;
     },
     
   },

@@ -5,11 +5,9 @@ import FormHelperText from '@mui/material/FormHelperText';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
-export default function BasicRating({setRating}) {
-  const [star, setStar] = React.useState('');
+export default function BasicRating({setRating, rate}) {
 
   const handleChange = (event) => {
-    setStar(event.target.value);
     setRating(event.target.value);
   };
 
@@ -20,7 +18,7 @@ export default function BasicRating({setRating}) {
         <Select
           labelId="demo-simple-select-helper-label"
           id="demo-simple-select-helper"
-          value={star}
+          defaultValue={rate}
           label="Ratings"
           onChange={handleChange}
         >
