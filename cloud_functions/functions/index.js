@@ -274,7 +274,6 @@ async function searchFlight() {
     }
 }
 
-
 async function searchPlacesV2() {
     try {
         const response = await axios.get('https://api.opentripmap.com/0.1/en/places/radius?', {
@@ -316,6 +315,60 @@ async function gpt(data) {
     } catch (error) {
         throw new Error(`GPT-3 API error: ${error.message}`);
     }
+}
+
+async function fetchRestaurants(location, radius) {
+    // First fetch with user preference
+    const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+            params: {
+                keyword: 'vietnamese or mexican',
+                location: '43.472599613636696, -80.53789113576617',
+                radius: 4000,
+                maxprice: '',
+                minprice: '',
+                type: 'restaurant',
+                key: `${googleAPI}`
+            }
+        })
+    const firstResults = response1.data.results;
+
+    // Second fetch for any cuisine
+    const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+        params: {
+            keyword: 'any cuisine',
+            location: '43.472599613636696, -80.53789113576617',
+            radius: 4000,
+            minprice: 2,
+            type: 'restaurant',
+            key: `${googleAPI}`
+        }
+    });
+    const secondResults = response2.data.results;
+    // Merge and remove duplicates, prioritizing user preference results
+    let ids = new Set(firstResults.map(result => result.place_id));
+
+    // Only add places from the secondResults that have a new place_id
+    for(let place of secondResults) {
+        if(!ids.has(place.place_id)) {
+            firstResults.push(place);
+            ids.add(place.place_id);
+        }
+    }
+
+    // Make sure no more than 40 results are returned
+    const finalResults = firstResults.slice(0, 40);
+
+    // Error handling.
+    if (!finalResults.length) {
+        throw new Error('No restaurants found');
+    }
+    let restaurantRes = finalResults.map((res) => ({
+        resName: res.name,
+        resID: res.place_id,
+        resRating: res.rating,
+        resTypes: res.types
+    }))
+    return restaurantRes
 }
 
 async function searchRestaurants() {
@@ -362,7 +415,8 @@ exports.generator = functions.https.onCall(async (data, context) => {
         // const hotelPromise =  searchHotels()
         // const [flightResponse, hotelResponse] = await Promise.all([flightPromise, hotelPromise]);
         // const { averageLat, averageLong } = getAverageLatLong(hotelResponse);
-        const restaurants = await searchRestaurants()
+        const restaurants = await fetchRestaurants()
+        console.log(restaurants)
 
         // const gptResponse = await gpt({
         //     flightData: flightResponse,

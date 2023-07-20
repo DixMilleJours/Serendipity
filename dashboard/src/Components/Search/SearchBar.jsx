@@ -16,6 +16,8 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
+import { httpsCallable, getFunctions, connectFunctionsEmulator } from "firebase/functions"
+import { getApp } from "firebase/app"
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -80,9 +82,9 @@ function SearchBar(loggedin) {
       // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
 
       // ！！！ local testing for now.
-      const response = await axios.get(
-        "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
-      );
+      // const response = await axios.get(
+      //   "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
+      // );
       // setStorage(response.data.data);
       // Call getOptimalFlight cloud function with the flight data
       const functions = getFunctions();
@@ -93,15 +95,15 @@ function SearchBar(loggedin) {
       const getOptimalFlight = httpsCallable(functionss, "generator");
       // !!! harcode budget for now.
       const optimalFlightResponse = await getOptimalFlight({
-        flightData: response.data,
-        budget: "1000",
+        // flightData: response.data,
+        // budget: "1000",
       });
 
       // Read result of the Cloud Function.
-      const optimalFlight = optimalFlightResponse.data.gptResponse.content;
-      console.log(optimalFlight);
-      setStorage(optimalFlight);
-      setOptimalFlight(optimalFlight); // Store the result in state
+      // const optimalFlight = optimalFlightResponse.data.gptResponse.content;
+      // console.log(optimalFlight);
+      // setStorage(optimalFlight);
+      //setOptimalFlight(optimalFlight); // Store the result in state
     } catch (error) {
       console.error(error);
     }
