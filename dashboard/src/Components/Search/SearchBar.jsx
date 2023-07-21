@@ -64,6 +64,10 @@ function SearchBar({ loggedin, setError }) {
   const travels = useSelector((state) => state.travels); // array
   const hotels = useSelector((state) => state.hotels); // array
 
+  // Preference
+  const [food, setFood] = React.useState("");
+  const [POI, setPOI] = React.useState("");
+
   function setEditorColor() {
     setIconColor(blueGrey[900]);
   }
@@ -144,12 +148,24 @@ function SearchBar({ loggedin, setError }) {
   };
 
   const flightData = {
-    depart: departure,
-    dest: destination,
+    departure: departure,
+    destination: destination,
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    
+    travelDetails: travels
+  }
 
+  const hotelData = {
+    rating: rate,
+    destination: destination,
+    startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
+    endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
+    hotelDetails: hotels
+  }
+
+  const userPreference = {
+    restaurant: food,
+    poi: POI,
   }
 
   const handleClickV2 = async () => {
@@ -157,11 +173,12 @@ function SearchBar({ loggedin, setError }) {
     connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
     const generator = httpsCallable(functionss, "generator");
     const finalResult = await generator({
-
+      flightData,
+      hotelData,
+      userPreference
     });
     // Read result of the Cloud Function.
     const result = finalResult.data.finalResult;
-    console.log(result)
     setStorage(result)
   }
 
@@ -418,6 +435,26 @@ function SearchBar({ loggedin, setError }) {
                           label="Destination"
                           onChange={(event) => {
                             setDestination(event.target.value);
+                          }}
+                        ></TextField>
+                      </Item>
+                    </Grid>
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <TextField
+                          label="Dining preference"
+                          onChange={(event) => {
+                            setFood(event.target.value);
+                          }}
+                        ></TextField>
+                      </Item>
+                    </Grid>
+                    <Grid xs={6}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
+                        <TextField
+                          label="Trip preference"
+                          onChange={(event) => {
+                            setPOI(event.target.value);
                           }}
                         ></TextField>
                       </Item>
