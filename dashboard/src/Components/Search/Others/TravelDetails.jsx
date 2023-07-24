@@ -171,15 +171,16 @@ function Location({ placeholder, defaultValue }) {
 
 function TravelDetails({ setTravelModalOpen, setTravelDetails }) {
   const preferredMode = useSelector((state) => state.mode);
+  const travels = useSelector((state) => state.travels);
   const [bgcolor, setBgcolor] = React.useState("");
   const [containerColor, setContainerColor] = React.useState("");
   const dispatch = useDispatch();
   const departure = useSelector((state) => state.departure);
   const destination = useSelector((state) => state.destination);
-  const [way, setWay] = React.useState("");
-  const [classOption, setClassOption] = React.useState("")
-  const [adults, setAdults] = React.useState(0);
-  const [children, setChildren] = React.useState(0);
+  const [way, setWay] = React.useState(travels[0]);
+  const [classOption, setClassOption] = React.useState(travels[1])
+  const [adults, setAdults] = React.useState(travels[2]);
+  const [children, setChildren] = React.useState(travels[3]);
 
   React.useEffect(() => {
     if (preferredMode === "dark") {

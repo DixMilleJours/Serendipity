@@ -26,6 +26,7 @@ import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLocation } from "../../state";
+import Reset from "./Others/Reset";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -52,8 +53,8 @@ function SearchBar({ loggedin, setError }) {
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
 
   const dispatch = useDispatch();
-  const defaultDestination = useSelector((state) => state.destination);
-  const defaultDeparture = useSelector((state) => state.departure);
+  var defaultDestination = useSelector((state) => state.destination);
+  var defaultDeparture = useSelector((state) => state.departure);
 
   const travels = useSelector((state) => state.travels); // array
   const hotels = useSelector((state) => state.hotels); // array
@@ -135,32 +136,43 @@ function SearchBar({ loggedin, setError }) {
     }
   };
 
+  function reset(){
+    defaultDeparture = "";
+    defaultDestination = "";
+    dispatch(setLocation({departure:null, destination:null}))
+    console.log(departure);
+  }
+
   React.useEffect(() => {});
 
   return (
     <>
       {visible && (
-        <Bounce y={-15} timing={150}>
-          <Button
-            variant="contained"
-            style={{
-              color: "white",
-              fontSize: "18px",
-              width: "200px",
-              marginTop: "200px",
-              marginRight: "0px",
-            }}
-            onClick={() => {
-              if (loggedin == true) {
-                setLoading(true);
-                setVisible(false);
-              }
-            }}
-          >
-            Generate Trip!
-          </Button>
-        </Bounce>
+        <Box display="flex" flexDirection="row" sx={{marginTop: "200px",}}>
+          <Bounce y={-15} timing={150}>
+            <Button
+              variant="contained"
+              style={{
+                color: "white",
+                fontSize: "18px",
+                width: "200px",
+                
+                marginRight: "0px",
+              }}
+              onClick={() => {
+                if (loggedin == true) {
+                  setLoading(true);
+                  setVisible(false);
+                }
+              }}
+            >
+              Generate Trip!
+            </Button>
+          </Bounce>
+          {visible && loggedin && <Reset />}
+        </Box>
       )}
+
       {isLoading && loggedin && (
         <React.Fragment>
           {isTravelModalOpen && !isTravelDetails && (
