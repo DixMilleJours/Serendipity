@@ -30,8 +30,9 @@ export default function Destination({
   marginLeft,
   placeholder,
   setDestination,
+  defaultValue
 }) {
-  const [value, setValue] = React.useState(null);
+  const [value, setValue] = React.useState(defaultValue);
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState([]);
   const loaded = React.useRef(false);
