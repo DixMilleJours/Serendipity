@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Fab from "@mui/material/Fab";
 import CheckIcon from "@mui/icons-material/Check";
 import { useDispatch } from "react-redux";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { setLocation, setHotel, setTravel } from "../../../state";
 import SaveIcon from "@mui/icons-material/Save";
 
@@ -36,8 +37,10 @@ export default function Reset() {
       setLoading(true);
       timer.current = window.setTimeout(() => {
         dispatch(setLocation({ departure: "", destination: "" }));
-        dispatch(setHotel({ room: "", adults: "", children: "" }));
-        dispatch(setTravel({way: "", classOption: "", adults: "", children: ""}));
+        dispatch(setHotel({ room: 0, adults: 0, children: 0 }));
+        dispatch(
+          setTravel({ way: "", classOption: "", adults: 0, children: 0 })
+        );
         setSuccess(true);
         setLoading(false);
       }, 2000);
@@ -47,14 +50,17 @@ export default function Reset() {
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <Box sx={{ m: 1, position: "relative" }}>
-        <Fab
-          aria-label="save"
-          color="primary"
-          sx={buttonSx}
-          onClick={handleButtonClick}
-        >
-          {success ? <CheckIcon /> : <SaveIcon color={grey[100]} />}
-        </Fab>
+        <Tooltip title="Reset">
+          <Fab
+            aria-label="save"
+            color="primary"
+            sx={buttonSx}
+            style={{ marginTop: "6px" }}
+            onClick={handleButtonClick}
+          >
+            {success ? <CheckIcon /> : <SaveIcon color={grey[100]} />}
+          </Fab>
+        </Tooltip>
         {loading && (
           <CircularProgress
             size={68}
