@@ -5,13 +5,8 @@ import GroupIcon from "@mui/icons-material/Group";
 import ChildFriendlyIcon from "@mui/icons-material/ChildFriendly";
 import { Box } from "@mui/material";
 
-function TravelInfo({ setTravelModalOpen }) {
+function TravelInfo() {
   const travels = useSelector((state) => state.travels);
-
-  // const way = useSelector((state) => state.way);
-  // React.useEffect(()=>{
-  //   console.log(way.way);
-  // },[way])
 
   return (
     <>

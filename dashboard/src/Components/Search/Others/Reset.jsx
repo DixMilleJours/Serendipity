@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Fab from "@mui/material/Fab";
 import CheckIcon from "@mui/icons-material/Check";
 import { useDispatch } from "react-redux";
-import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import { setLocation, setHotel, setTravel } from "../../../state";
 import SaveIcon from "@mui/icons-material/Save";
 

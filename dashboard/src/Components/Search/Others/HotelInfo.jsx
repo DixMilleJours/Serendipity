@@ -5,7 +5,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import ChildFriendlyIcon from "@mui/icons-material/ChildFriendly";
 import HouseIcon from "@mui/icons-material/House";
 
-function HotelInfo({ setModalOpen }) {
+function HotelInfo() {
   const hotels = useSelector((state) => state.hotels);
   const destination = useSelector((state) => state.destination);
 
