@@ -26,6 +26,13 @@ import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLocation } from "../../state";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import Chip from '@mui/material/Chip';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import MenuItem from '@mui/material/MenuItem';
+
 import {
   httpsCallable,
   getFunctions,
@@ -65,12 +72,53 @@ function SearchBar({ loggedin, setError }) {
   const hotels = useSelector((state) => state.hotels); // array
 
   // Preference
-  const [food, setFood] = React.useState("");
+  const [food, setFood] =React.useState([]);
   const [POI, setPOI] = React.useState("");
 
   function setEditorColor() {
     setIconColor(blueGrey[900]);
   }
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  const preferenceTags = [
+    'Chinese',
+    'Hamburger',
+    'French',
+    'Indian',
+    'Japanese',
+    'Mexican',
+    'Pizza',
+    'Thai',
+    'Middle Eastern',
+    'Ice Cream',
+  ];
+
+  const handleChangeDiningPreference = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setFood(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+
+
+  const splitContent = (content) => {
+    // Regular expression to match the day numbers (assuming they are in the format "Day X")
+    const dayRegex = /Day\s+\d+:\s+/g;
+    return content.split(dayRegex);
+  };
 
   async function generateTrip(e) {
     e.preventDefault();
@@ -148,8 +196,8 @@ function SearchBar({ loggedin, setError }) {
   };
 
   const flightData = {
-    departure: departure,
-    destination: destination,
+    departure: "SYD",
+    destination:"BKK",
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     travelDetails: travels
@@ -157,7 +205,7 @@ function SearchBar({ loggedin, setError }) {
 
   const hotelData = {
     rating: rate,
-    destination: destination,
+    destination: "BKK",
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     hotelDetails: hotels
@@ -172,6 +220,11 @@ function SearchBar({ loggedin, setError }) {
     const functionss = getFunctions();
     connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
     const generator = httpsCallable(functionss, "generator");
+
+    console.log(flightData.departure)
+    console.log(flightData.destination)
+    console.log(hotelData.destination)
+
     const finalResult = await generator({
       flightData,
       hotelData,
@@ -441,12 +494,34 @@ function SearchBar({ loggedin, setError }) {
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Dining preference"
-                          onChange={(event) => {
-                            setFood(event.target.value);
-                          }}
-                        ></TextField>
+                      <FormControl sx={{ m: 0, width: 300 }}>
+                          <InputLabel id="demo-multiple-chip-label">Dining Preference</InputLabel>
+                          <Select
+                            labelId="demo-multiple-chip"
+                            id="demo-multiple-chip"
+                            
+                            value={food}
+                            onChange={handleChangeDiningPreference}
+                            input={<OutlinedInput id="select-multiple-chip" label="Dining Preference" />}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((value) => (
+                                  <Chip key={value} label={value} />
+                                ))}
+                              </Box>
+                            )}
+                            MenuProps={MenuProps}
+                          >
+                            {preferenceTags.map((tag) => (
+                              <MenuItem
+                                key={tag}
+                                value={tag}
+                              >
+                                {tag}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Item>
                     </Grid>
                     <Grid xs={6}>
@@ -476,16 +551,25 @@ function SearchBar({ loggedin, setError }) {
                   </Button>
                   {storage && (
                     <Grid container spacing={2.5}>
-                      <Grid xs={12} flexDirection="row">
+                      <Grid xs={12} flexDirection="column">
                         <Item
                           style={{
                             display: "flex",
-                            flexDirection: "row",
+                            flexDirection: "column",
                             marginRight: "2px",
                           }}
                         >
                           <hr></hr>
-                          <p>{storage}</p>
+                          {splitContent(storage).map((part, index) => (
+                          <div key={index} style={{
+                            fontSize: "16px",
+                            color: "#FFFFFF",
+                          }}>
+                 
+                          {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
+                          {part}
+                        </div>
+                         ))}
                         </Item>
                       </Grid>
                     </Grid>
