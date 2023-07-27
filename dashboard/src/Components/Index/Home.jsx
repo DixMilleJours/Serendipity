@@ -6,7 +6,7 @@ import { Alert, Container } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import SearchBar from "../Search/SearchBar";
 import MediaCard from "../Display/MediaCard";
-import { Bounce } from "../../Animations/Bounce";
+import Slide from "@mui/material/Slide";
 import "../../index.css";
 import "../../static/css/login.css";
 import { useAuth } from "../../AuthContext";
@@ -19,20 +19,19 @@ export default function Home(prefer) {
   const currentUser = useAuth();
   const [isModalOpen, setModalOpen] = React.useState(false);
   const state = useSelector((state) => state.open);
-  const [error, setError] = React.useState(false);
+  const [error, setError] = React.useState({ open: false, content: "" });
 
   React.useEffect(() => {}, [currentUser]);
 
   return (
     <>
       <Canvas>
-        
         <Navigation
           loggedin={currentUser != null}
           username={"TODO"}
           prefer={prefer}
         />
-       
+
         <div className="center">
           <Header />
         </div>
@@ -48,11 +47,18 @@ export default function Home(prefer) {
           marginTop: "50px",
         }}
       >
-         {error && (
+        {error.open && (
           <Stack sx={{ width: "50%" }} spacing={2}>
-            <Alert severity="error" onClose={() => {setError(false)}}>
-              departure or destination should not be empty
-            </Alert>
+            <Slide direction="down" in={error.open} mountOnEnter unmountOnExit>
+              <Alert
+                severity="error"
+                onClose={() => {
+                  setError({ open: false, content: "" });
+                }}
+              >
+                {error.content}
+              </Alert>
+            </Slide>
           </Stack>
         )}
         <SearchBar loggedin={currentUser != null} setError={setError} />

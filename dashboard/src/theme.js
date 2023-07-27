@@ -20,7 +20,8 @@ export const themeSettings = (mode) => {
               light: "#333333",
             },
             background:{
-              default: grey[900]
+              // default: grey[900]
+              default: "black"
             }
           }
         : {

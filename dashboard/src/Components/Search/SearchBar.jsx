@@ -26,12 +26,7 @@ import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLocation } from "../../state";
-import {
-  httpsCallable,
-  getFunctions,
-  connectFunctionsEmulator,
-} from "firebase/functions";
-import { getApp } from "firebase/app";
+import Reset from "./Others/Reset";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -58,15 +53,11 @@ function SearchBar({ loggedin, setError }) {
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
 
   const dispatch = useDispatch();
-  const defaultDestination = useSelector((state) => state.destination);
-  const defaultDeparture = useSelector((state) => state.departure);
+  var defaultDestination = useSelector((state) => state.destination);
+  var defaultDeparture = useSelector((state) => state.departure);
 
   const travels = useSelector((state) => state.travels); // array
   const hotels = useSelector((state) => state.hotels); // array
-
-  // Preference
-  const [food, setFood] = React.useState("");
-  const [POI, setPOI] = React.useState("");
 
   function setEditorColor() {
     setIconColor(blueGrey[900]);
@@ -106,106 +97,87 @@ function SearchBar({ loggedin, setError }) {
   const handleClick = async () => {
     // reset storage
     setStorage();
-    setStorage();
 
     const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
     const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
     try {
-      // reset storage
-      setStorage();
-
-      // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-      // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-      // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-
-      // ！！！ local testing for now.
-      // const response = await axios.get(
-      //   "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
-      // );
-      // setStorage(response.data.data);
-      // Call getOptimalFlight cloud function with the flight data
-      const functions = getFunctions();
-      // !!! switch to use deployed function later
-      const functionss = getFunctions(getApp());
-      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-
-      const getFinalResult = httpsCallable(functionss, "generator");
-      // !!! harcode budget for now.
-      const finalResult = await getFinalResult({
-        // flightData: response.data,
-        // budget: "1000",
-      });
-
-      // Read result of the Cloud Function.
-      const optimalResult = finalResult.data.gptResponse.content;
-      console.log(optimalResult);
-      setStorage(optimalResult);
+      const response = await axios.post(
+        "https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight",
+        {
+          data: {
+            slices: [
+              {
+                origin: departure,
+                destination: destination,
+                departure_date: startDate,
+              },
+              {
+                origin: destination,
+                destination: departure,
+                departure_date: endDate,
+              },
+            ],
+            passengers: [
+              {
+                type: "adult",
+              },
+            ],
+            cabin_class: "business",
+            max_connections: 0,
+          },
+        }
+      );
+      setStorage(response.data.data);
+      // console.log(storage)
+      // console.log(storage[0].owner.name);
     } catch (error) {
-      console.error(error);
       console.error(error);
     }
   };
 
-  const flightData = {
-    departure: departure,
-    destination: destination,
-    startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
-    endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    travelDetails: travels
+  function reset() {
+    defaultDeparture = "";
+    defaultDestination = "";
+    dispatch(setLocation({ departure: null, destination: null }));
+    console.log(departure);
   }
 
-  const hotelData = {
-    rating: rate,
-    destination: destination,
-    startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
-    endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    hotelDetails: hotels
-  }
-
-  const userPreference = {
-    restaurant: food,
-    poi: POI,
-  }
-
-  const handleClickV2 = async () => {
-    const functionss = getFunctions();
-    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-    const generator = httpsCallable(functionss, "generator");
-    const finalResult = await generator({
-      flightData,
-      hotelData,
-      userPreference
-    });
-    // Read result of the Cloud Function.
-    const result = finalResult.data.finalResult;
-    setStorage(result)
-  }
+  React.useEffect(() => {});
 
   return (
     <>
       {visible && (
-        <Bounce y={-15} timing={150}>
-          <Button
-            variant="contained"
-            style={{
-              color: "white",
-              fontSize: "18px",
-              width: "200px",
-              marginTop: "200px",
-              marginRight: "0px",
-            }}
-            onClick={() => {
-              if (loggedin == true) {
-                setLoading(true);
-                setVisible(false);
-              }
-            }}
-          >
-            Generate Trip!
-          </Button>
-        </Bounce>
+        <Box display="flex" flexDirection="row" sx={{ marginTop: "0px" }}>
+          <Bounce y={-15} timing={150}>
+            <Button
+              variant="contained"
+              style={{
+                color: "white",
+                fontSize: "18px",
+                width: "200px",
+
+                marginRight: "0px",
+              }}
+              onClick={() => {
+                if (loggedin == true) {
+                  setLoading(true);
+                  setVisible(false);
+                } else {
+                  setError({
+                    open: true,
+                    content: "Login is required to view the trip generator",
+                  });
+                }
+              }}
+            >
+              Generate Trip!
+            </Button>
+          </Bounce>
+          {visible && loggedin && <Reset />}
+        </Box>
       )}
+
       {isLoading && loggedin && (
         <React.Fragment>
           {isTravelModalOpen && !isTravelDetails && (
@@ -289,7 +261,11 @@ function SearchBar({ loggedin, setError }) {
                             variant="contained"
                             onClick={() => {
                               if (departure === null || destination === null) {
-                                setError(true);
+                                setError({
+                                  open: true,
+                                  content:
+                                    "departure or destination should not be empty",
+                                });
                               } else {
                                 setTravelModalOpen(true);
                                 setTravelDetails(false);
@@ -329,7 +305,11 @@ function SearchBar({ loggedin, setError }) {
                                     departure === null ||
                                     destination === null
                                   ) {
-                                    setError(true);
+                                    setError({
+                                      open: true,
+                                      content:
+                                        "departure or destination should not be empty",
+                                    });
                                   } else {
                                     setTravelModalOpen(true);
                                     setTravelDetails(false);
@@ -361,7 +341,11 @@ function SearchBar({ loggedin, setError }) {
                             variant="contained"
                             onClick={() => {
                               if (departure === null || destination === null) {
-                                setError(true);
+                                setError({
+                                  open: true,
+                                  content:
+                                    "departure or destination should not be empty",
+                                });
                               } else {
                                 setModalOpen(true);
                                 setHotelDetails(false);
@@ -400,7 +384,11 @@ function SearchBar({ loggedin, setError }) {
                                     departure === null ||
                                     destination === null
                                   ) {
-                                    setError(true);
+                                    setError({
+                                      open: true,
+                                      content:
+                                        "departure or destination should not be empty",
+                                    });
                                   } else {
                                     setModalOpen(true);
                                     setHotelDetails(false);
@@ -439,26 +427,6 @@ function SearchBar({ loggedin, setError }) {
                         ></TextField>
                       </Item>
                     </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Dining preference"
-                          onChange={(event) => {
-                            setFood(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Trip preference"
-                          onChange={(event) => {
-                            setPOI(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
                   </Grid>
                   {/* </Box> */}
                   <Button
@@ -470,7 +438,7 @@ function SearchBar({ loggedin, setError }) {
                     }}
                     variant="contained"
                     endIcon={<SendIcon />}
-                    onClick={handleClickV2}
+                    onClick={handleClick}
                   >
                     Let's go!
                   </Button>
@@ -484,8 +452,47 @@ function SearchBar({ loggedin, setError }) {
                             marginRight: "2px",
                           }}
                         >
-                          <hr></hr>
-                          <p>{storage}</p>
+                          <div>
+                            <h2>Results found...</h2>
+                            {storage.map((item, index) => {
+                              return (
+                                <div key={index}>
+                                  <h3>Flight {index + 1}</h3>
+                                  <p>
+                                    {item.owner.name}
+                                    <img
+                                      src={`https://assets.duffel.com/img/airlines/for-light-background/full-color-logo/${item.owner.iata_code}.svg`}
+                                      width={24}
+                                      height={24}
+                                    />
+                                    {item.total_amount +
+                                      " " +
+                                      item.total_currency}
+                                  </p>
+
+                                  <p>
+                                    {formatDateTime(
+                                      item.slices[0].segments[0].departing_at
+                                    )}
+                                    <hr width="10px"></hr>
+                                    {formatDateTime(
+                                      item.slices[0].segments[0].arriving_at
+                                    )}
+                                  </p>
+                                  <hr></hr>
+                                  <p>
+                                    {formatDateTime(
+                                      item.slices[1].segments[0].departing_at
+                                    )}
+                                    <hr width="10px"></hr>
+                                    {formatDateTime(
+                                      item.slices[1].segments[0].arriving_at
+                                    )}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </Item>
                       </Grid>
                     </Grid>
