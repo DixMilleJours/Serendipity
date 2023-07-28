@@ -253,7 +253,8 @@ async function searchFlight(data) {
             throw new Error('No flights found');
         }
         let flightRes = response.data.map(item => ({
-            carrier: item.validatingAirlineCodes[0],
+            departureFlightCode: item.validatingAirlineCodes[0] + item.itineraries[0].segments[0].number,
+            returnFlightCode:  item.validatingAirlineCodes[0] + item.itineraries[1].segments[0].number,
             currency: item.price.currency,
             price: item.price.grandTotal,
             // go_duration: item.itineraries[0].duration,
@@ -275,39 +276,47 @@ async function searchFlight(data) {
     }
 }
 
-async function searchPlacesV2() {
-    try {
-        const response = await axios.get('https://api.opentripmap.com/0.1/en/places/radius?', {
-            params: {
-                apikey: placeAPIKey,
-                radius: 5000,
-                lat: 32.05458124467749,
-                lon: 118.78957564478667,
-                kinds: "restaurants",
-                format: "json",
-                limit: 10
-            }
-        });
-        console.log(response.data)
-        return response.data
-    } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
-    }
-}
-
-async function gpt({flight, hotel, restaurant, poi}) {
+async function gpt({flight, hotel, restaurant, poi, start, end, foodPref, poiPref}) {
 
     // !!!! budget is an array of 2 numbers, so will need to change the prompt.
     const prompt = `Given JSON data for the flight ${JSON.stringify(flight)}, the hotel ${JSON.stringify(hotel)}, the restaurant ${JSON.stringify(restaurant)}, and the tourist attraction ${JSON.stringify(poi)}, return the best itinerary in short human-readable sentence. No explanation.`;
 
-    const promptV2 = `Please suggest an optimal itinerary for my trip in human-readable and intriguing sentences.
+    const promptV2 = `Please suggest the best itinerary for my trip in human-readable, intriguing and explanatory sentences. Directly give the final result, without including any notes or disclaimers at the end.
+    Not include any assumptions not specified in the data provided below.
+    Be in a day-by-day format (Day 1, Day 2, etc.).
+    Must only include one hotel check-in on the first day and check-out on the last day. Must clearly explain the two flights to take with human-readable time. Half of selected restaurants and tourist attractions must be based on user preferences of ${foodPref} food and ${poiPref} tourist attraction, while the other half selected must not be based on such preferences to ensure diversity during the trip.
     Number of Meals per Day: 2
+    No meal for morning.
     Preferences:
+    Start date: ${start}
+    End date: ${end}
     Flights: ${JSON.stringify(flight)}
     Hotels: ${JSON.stringify(hotel)}
     Restaurants: ${JSON.stringify(restaurant)}
     Tourist Attractions: ${JSON.stringify(poi)}
     Please format the response using line breaks or special characters to ensure better readability when displayed on the front-end UI.`
+
+    const promptV3 = `Please suggest the best itinerary for my trip, formatted in a day-by-day manner (Day 1, Day 2, etc.). The itinerary should be in human-readable, intriguing and explanatory sentences, and should not include any assumptions not specified in the data provided.
+
+    The itinerary must include:
+    - Clearly mention start date ${start} and end date ${end} of this itinerary.
+    - One hotel check-in on ${start} and check-out on ${end}.
+    - Return flight must be on ${end}.
+    - Clear explanations of the two flights to take with departure times and flight codes.
+    - Brief, interesting highlights of each suggested tourist attraction to give a clear sense of what to expect.
+    - Recommendations for two meals per day, with no meal in the morning.
+    - A balance of restaurant and tourist attraction recommendations, with half based on user preferences of ${foodPref} food and ${poiPref} tourist attraction, and the other half not based on these preferences to ensure diversity.
+
+    !! Do not include any notes, disclaimers, or additional information at the end of the itinerary.
+
+    Details:
+    - Flights: ${JSON.stringify(flight)}
+    - Hotels: ${JSON.stringify(hotel)}
+    - Restaurants: ${JSON.stringify(restaurant)}
+    - Tourist Attractions: ${JSON.stringify(poi)}
+
+    The response should be formatted using line breaks or special characters for better readability when displayed on the front-end UI.`;
+
 
     try {
         const gptResponse = await openai.createChatCompletion({
@@ -315,7 +324,7 @@ async function gpt({flight, hotel, restaurant, poi}) {
             messages: [
                 {
                     role: 'user',
-                    content: promptV2
+                    content: promptV3
                 }
             ]
         })
@@ -339,7 +348,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
                 key: `${googleAPI}`
             }
         })
-        let firstResults = response1.data.results;
+        let firstResults = response1.data.results.slice(0, 10);
 
         // Second fetch for any cuisine
         const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -357,7 +366,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
 
         // Only add places from the secondResults that have a new place_id
         for (let place of secondResults) {
-            if (!ids.has(place.place_id)) {
+            if (!ids.has(place.place_id) && firstResults.length < 20) {
                 firstResults.push(place);
                 ids.add(place.place_id);
             }
@@ -386,36 +395,6 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
     }
 }
 
-async function searchRestaurants() {
-    try {
-        const response = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
-            params: {
-                keyword: 'vietnamese or mexican',
-                location: '43.472599613636696, -80.53789113576617',
-                radius: 4000,
-                maxprice: '',
-                minprice: '',
-                type: 'restaurant',
-                key: `${googleAPI}`
-            }
-        })
-        // Error handling.
-        if (!response.data.results.length) {
-            throw new Error('No hotels found');
-        }
-        let restaurantRes = response.data.results.map((res) => ({
-            resName: res.name,
-            resID: res.place_id,
-            resRating: res.rating,
-            resTypes: res.types
-        }))
-        console.log(restaurantRes)
-        return restaurantRes
-    } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
-    }
-}
-
 async function searchTouristAttraction({averageLat, averageLong, userPreference}) {
     try {
         const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -429,7 +408,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
                 key: `${googleAPI}`
             }
         })
-        let firstResults = response1.data.results;
+        let firstResults = response1.data.results.slice(0, 10);
 
         // Second fetch for any cuisine
         const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -447,7 +426,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
 
         // Only add places from the secondResults that have a new place_id
         for (let place of secondResults) {
-            if (!ids.has(place.place_id)) {
+            if (!ids.has(place.place_id) && firstResults.length < 20) {
                 firstResults.push(place);
                 ids.add(place.place_id);
             }
@@ -482,6 +461,10 @@ exports.generator = functions.https.onCall(async (data, context) => {
         const flightData = data.flightData;
         const hotelData = data.hotelData;
         const userPreference = data.userPreference;
+        const start =  flightData.startDate;
+        const end = flightData.endDate;
+        const foodPref = userPreference.restaurant;
+        const poiPref = userPreference.poi;
 
         /* Second, make API calls.  */
 
@@ -503,7 +486,11 @@ exports.generator = functions.https.onCall(async (data, context) => {
             flight,
             hotel,
             restaurant,
-            poi
+            poi,
+            start,
+            end,
+            foodPref,
+            poiPref
         })
         const finalResult = gptResponse.content;
         return { finalResult: finalResult }

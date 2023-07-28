@@ -169,17 +169,24 @@ function SearchBar({ loggedin, setError }) {
   }
 
   const handleClickV2 = async () => {
-    const functionss = getFunctions();
-    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-    const generator = httpsCallable(functionss, "generator");
-    const finalResult = await generator({
-      flightData,
-      hotelData,
-      userPreference
-    });
-    // Read result of the Cloud Function.
-    const result = finalResult.data.finalResult;
-    setStorage(result)
+    try {
+      setStorage("")
+      const functionss = getFunctions();
+      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+      const generator = httpsCallable(functionss, "generator");
+      const finalResult = await generator({
+        flightData,
+        hotelData,
+        userPreference
+      });
+      // Read result of the Cloud Function.
+      const result = finalResult.data.finalResult;
+      setStorage(result)
+    } catch (error) {
+      console.error(`Error in handleClickV2: ${error.message}`);
+      // Set error message in storage
+      setStorage("An error occurred. Please re-enter your information and try again.");
+    }
   }
 
   return (
