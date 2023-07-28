@@ -192,13 +192,17 @@ function SearchBar({ loggedin, setError }) {
               color: "white",
               fontSize: "18px",
               width: "200px",
-              marginTop: "200px",
               marginRight: "0px",
             }}
             onClick={() => {
               if (loggedin == true) {
                 setLoading(true);
                 setVisible(false);
+              }else{
+                setError({
+                  open: true,
+                  content: "Login is required to view the trip generator",
+                });
               }
             }}
           >
@@ -289,7 +293,11 @@ function SearchBar({ loggedin, setError }) {
                             variant="contained"
                             onClick={() => {
                               if (departure === null || destination === null) {
-                                setError(true);
+                                setError({
+                                  open: true,
+                                  content:
+                                    "departure or destination should not be empty",
+                                });
                               } else {
                                 setTravelModalOpen(true);
                                 setTravelDetails(false);
@@ -329,7 +337,11 @@ function SearchBar({ loggedin, setError }) {
                                     departure === null ||
                                     destination === null
                                   ) {
-                                    setError(true);
+                                    setError({
+                                      open: true,
+                                      content:
+                                        "departure or destination should not be empty",
+                                    });
                                   } else {
                                     setTravelModalOpen(true);
                                     setTravelDetails(false);
@@ -361,7 +373,11 @@ function SearchBar({ loggedin, setError }) {
                             variant="contained"
                             onClick={() => {
                               if (departure === null || destination === null) {
-                                setError(true);
+                                setError({
+                                  open: true,
+                                  content:
+                                    "departure or destination should not be empty",
+                                });
                               } else {
                                 setModalOpen(true);
                                 setHotelDetails(false);
@@ -400,7 +416,11 @@ function SearchBar({ loggedin, setError }) {
                                     departure === null ||
                                     destination === null
                                   ) {
-                                    setError(true);
+                                    setError({
+                                      open: true,
+                                      content:
+                                        "departure or destination should not be empty",
+                                    });
                                   } else {
                                     setModalOpen(true);
                                     setHotelDetails(false);

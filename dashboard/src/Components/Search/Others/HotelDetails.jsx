@@ -109,6 +109,7 @@ function Location({ placeholder, defaultValue }) {
       autoComplete
       includeInputInList
       filterSelectedOptions
+      disabled={true}
       value={value}
       noOptionsText="No locations"
       onChange={(event, newValue) => {
@@ -168,9 +169,10 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
   const [containerColor, setContainerColor] = React.useState("");
   const departure = useSelector((state) => state.departure);
   const destination = useSelector((state) => state.destination);
-  const [room, setRooms] = React.useState(0);
-  const [adults, setAdults] = React.useState(0);
-  const [children, setChildren] = React.useState(0);
+  const hotels = useSelector((state) => state.hotels);
+  const [room, setRooms] = React.useState(hotels[0]);
+  const [adults, setAdults] = React.useState(hotels[1]);
+  const [children, setChildren] = React.useState(hotels[2]);
 
   React.useEffect(() => {
     if (preferredMode === "dark") {

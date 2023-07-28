@@ -34,6 +34,8 @@ export const authSlice = createSlice({
       state.travels[1] = action.payload.classOption;
       state.travels[2] = action.payload.adults;
       state.travels[3] = action.payload.children;
+      state.travels[4] = action.payload.departure;
+      state.travels[5] = action.payload.destination;
     },
     setHotel: (state, action) => {
       state.hotels[0] = action.payload.room;
