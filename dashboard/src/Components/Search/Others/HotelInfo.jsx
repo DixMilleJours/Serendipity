@@ -33,12 +33,22 @@ function HotelInfo() {
 
   return (
     <>
-      <Box sx={{ alignContent: "center", textAlign: "center" }}>
-        {getPlace(destination.description)} &nbsp;
-        <HouseIcon />
-        &nbsp; {hotels[0]}&nbsp;
-        <GroupIcon /> {travels[2]}&nbsp;
-        <ChildFriendlyIcon /> {travels[3]}&nbsp;
+      <Box sx={{ alignContent: "center", textAlign: "center", display: 'flex', flexWrap: 'wrap'}}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          {getPlace(destination.description)}&nbsp;&nbsp;
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <HouseIcon />
+          {hotels[0]}&nbsp;&nbsp;
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <GroupIcon />
+          {travels[2]}&nbsp;&nbsp;
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <ChildFriendlyIcon />
+          {travels[3]}&nbsp;&nbsp;
+        </Box>
       </Box>
     </>
   );

@@ -13,7 +13,7 @@ export default function BasicRating({setRating, rate}) {
 
   return (
     <div>
-      <FormControl sx={{ m: 1, width: 240}}>
+      <FormControl sx={{ marginTop: 1, width: 240}}>
         <InputLabel id="demo-simple-select-helper-label">Ratings</InputLabel>
         <Select
           labelId="demo-simple-select-helper-label"
