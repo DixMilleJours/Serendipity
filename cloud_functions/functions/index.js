@@ -209,11 +209,11 @@ async function searchHotels(data) {
         let hotelIds = hotelInfo.map((hotel) => hotel.hotelId);
         const response2 = await amadeus.shopping.hotelOffersSearch.get({
             hotelIds: JSON.stringify(hotelIds),
-            adults: data.hotelDetails[1],
+            adults: data.adults,
             // TODO -> change check in / out date.
             checkInDate: data.startDate,
             checkOutDate: data.endDate,
-            roomQuantity: data.hotelDetails[0],
+            roomQuantity: data.rooms,
         })
         // Error handling.
         if (!response2.data.length) {

@@ -180,7 +180,8 @@ function SearchBar({ loggedin, setError }) {
     destination: destination,
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    hotelDetails: hotels
+    rooms: hotels[0],
+    adults: travels[2]
   }
 
   const userPreference = {
@@ -189,6 +190,11 @@ function SearchBar({ loggedin, setError }) {
   }
 
   const handleClickV2 = async () => {
+    // console.log({
+    //   flightData,
+    //   hotelData,
+    //   userPreference
+    // })
     try {
       setStorage("")
     const functionss = getFunctions();
@@ -498,15 +504,15 @@ function SearchBar({ loggedin, setError }) {
                             label="Dining Preference"
                             onChange={handleChangeDiningPreference}
                           >
-                            <MenuItem value={10}>Chinese</MenuItem>
-                            <MenuItem value={20}>Korean</MenuItem>
-                            <MenuItem value={30}>French</MenuItem>
-                            <MenuItem value={40}>Indian</MenuItem>
-                            <MenuItem value={50}>Japanese</MenuItem>
-                            <MenuItem value={60}>Mexican</MenuItem>
-                            <MenuItem value={70}>Thai</MenuItem>
-                            <MenuItem value={80}>American</MenuItem>
-                            <MenuItem value={90}>Greek</MenuItem>
+                            <MenuItem value={"Chinese"}>Chinese</MenuItem>
+                            <MenuItem value={"Korean"}>Korean</MenuItem>
+                            <MenuItem value={"French"}>French</MenuItem>
+                            <MenuItem value={"Indian"}>Indian</MenuItem>
+                            <MenuItem value={"Japanese"}>Japanese</MenuItem>
+                            <MenuItem value={"Mexican"}>Mexican</MenuItem>
+                            <MenuItem value={"Thai"}>Thai</MenuItem>
+                            <MenuItem value={"American"}>American</MenuItem>
+                            <MenuItem value={"Greek"}>Greek</MenuItem>
                           </Select>
                         </FormControl>
                       </Box>
@@ -524,15 +530,15 @@ function SearchBar({ loggedin, setError }) {
                             label="Trip Preference"
                             onChange={handleChangePOI}
                           >
-                            <MenuItem value={10}>park</MenuItem>
-                            <MenuItem value={20}>art_gallery</MenuItem>
-                            <MenuItem value={30}>campground</MenuItem>
-                            <MenuItem value={40}>church</MenuItem>
-                            <MenuItem value={50}>zoo</MenuItem>
-                            <MenuItem value={60}>university</MenuItem>
-                            <MenuItem value={70}>store</MenuItem>
-                            <MenuItem value={80}>museum</MenuItem>
-                            <MenuItem value={90}>bar</MenuItem>
+                            <MenuItem value={"park"}>park</MenuItem>
+                            <MenuItem value={"art_gallery"}>art_gallery</MenuItem>
+                            <MenuItem value={"campground"}>campground</MenuItem>
+                            <MenuItem value={"church"}>church</MenuItem>
+                            <MenuItem value={"zoo"}>zoo</MenuItem>
+                            <MenuItem value={"university"}>university</MenuItem>
+                            <MenuItem value={"store"}>store</MenuItem>
+                            <MenuItem value={"museum"}>museum</MenuItem>
+                            <MenuItem value={"bar"}>bar</MenuItem>
                           </Select>
                         </FormControl>
                       </Box>
