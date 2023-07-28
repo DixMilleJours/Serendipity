@@ -88,7 +88,8 @@ function SearchBar({ loggedin, setError }) {
 
   const splitContent = (content) => {
     // Regular expression to match the day numbers (assuming they are in the format "Day X")
-    const dayRegex = /Day\s+\d+ [^:]+:\s+/g;
+    const dayRegex = /Day\s?\d+[0-9a-zA-Z+-/*=%&|!@#$^/(/)]?\s?:?\s?/g;
+    // console.log(content)
     return content.split(dayRegex);
   };
 
@@ -472,26 +473,7 @@ function SearchBar({ loggedin, setError }) {
                       </Item>
                     </Grid>
                     {/* Temporary Addition */}
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Departure"
-                          onChange={(event) => {
-                            setDeparture(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Destination"
-                          onChange={(event) => {
-                            setDestination(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
+                   
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
                       <Box sx={{ minWidth: 210 }}>
@@ -530,6 +512,7 @@ function SearchBar({ loggedin, setError }) {
                             label="Trip Preference"
                             onChange={handleChangePOI}
                           >
+
                             <MenuItem value={"park"}>🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park</MenuItem>
                             <MenuItem value={"art_gallery"}>🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art Gallery</MenuItem>
                             <MenuItem value={"campground"}>⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground</MenuItem>
@@ -573,7 +556,7 @@ function SearchBar({ loggedin, setError }) {
                           {splitContent(storage).map((part, index) => (
                           <div key={index} style={{
                             fontSize: "16px",
-                            color: "#FFFFFF",
+                            // color: "#FFFFFF",
                           }}>
                  
                           {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
