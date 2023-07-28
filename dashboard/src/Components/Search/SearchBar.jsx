@@ -473,26 +473,7 @@ function SearchBar({ loggedin, setError }) {
                       </Item>
                     </Grid>
                     {/* Temporary Addition */}
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Departure"
-                          onChange={(event) => {
-                            setDeparture(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Destination"
-                          onChange={(event) => {
-                            setDestination(event.target.value);
-                          }}
-                        ></TextField>
-                      </Item>
-                    </Grid>
+                   
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
                       <Box sx={{ minWidth: 210 }}>
