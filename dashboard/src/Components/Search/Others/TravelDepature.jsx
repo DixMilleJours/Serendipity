@@ -39,8 +39,8 @@ function getAirportCode(fullString) {
   return description;
 }
 
-export default function TravelDeparture({ placeholder, setDeparture }) {
-  const [value, setValue] = React.useState("");
+export default function TravelDeparture({ placeholder, setDeparture, defaultValue }) {
+  const [value, setValue] = React.useState(defaultValue);
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState([]);
   const loaded = React.useRef(false);

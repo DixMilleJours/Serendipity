@@ -7,19 +7,20 @@ import HouseIcon from "@mui/icons-material/House";
 
 function HotelInfo() {
   const hotels = useSelector((state) => state.hotels);
+  const travels = useSelector((state) => state.travels);
   const destination = useSelector((state) => state.destination);
 
   function getPlace(fullString) {
     // console.log(fullString.length)
 
 
-    if (fullString === null || fullString === "") {
+    if (fullString === null || fullString === "" || fullString === undefined) {
       return "";
     }
     // if(fullString.description.length === 3){
     //   return fullString;
     // }
-    const description = fullString.description.split(",")[0];
+    const description = fullString.split(",")[0];
     const match = description.match(/\((.*?)\)/);
 
     if (match) {
@@ -33,11 +34,11 @@ function HotelInfo() {
   return (
     <>
       <Box sx={{ alignContent: "center", textAlign: "center" }}>
-        {getPlace(destination)} &nbsp;
+        {getPlace(destination.description)} &nbsp;
         <HouseIcon />
         &nbsp; {hotels[0]}&nbsp;
-        <GroupIcon /> {hotels[1]}&nbsp;
-        <ChildFriendlyIcon /> {hotels[2]}&nbsp;
+        <GroupIcon /> {travels[2]}&nbsp;
+        <ChildFriendlyIcon /> {travels[3]}&nbsp;
       </Box>
     </>
   );
