@@ -88,8 +88,8 @@ function SearchBar({ loggedin, setError }) {
 
   const splitContent = (content) => {
     // Regular expression to match the day numbers (assuming they are in the format "Day X")
-    const dayRegex = /Day\s?\d+[0-9a-zA-Z+-/*=%&|!@#$^/(/)]?\s?:?\s?/g;
-    // console.log(content)
+    const dayRegex = /Day\s*\d+\s*[0-9a-zA-Z+-/*=%&|!@#$^()]*\s*:?\s*/g;
+    //  console.log(content)
     return content.split(dayRegex);
   };
 
