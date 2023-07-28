@@ -64,11 +64,11 @@ function Navigation({ loggedin, username }) {
   const alt = theme.palette.background.alt;
 
   const lHandleMouseOver = () => {
-    setIconColor(grey[900]); // Change the color to grey[900] on mouse over
+    setIconColor(grey[700]); // Change the color to grey[900] on mouse over
   };
 
   const lHandleMouseOut = () => {
-    setIconColor(blueGrey[500]); // Reset the color on mouse out
+    setIconColor(grey[500]); // Reset the color on mouse out 
   };
 
   const dHandleMouseOver = () => {
@@ -164,9 +164,9 @@ function Navigation({ loggedin, username }) {
                 />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
+            {/* <Message sx={{ fontSize: "25px" }} />
             <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
+            <Help sx={{ fontSize: "25px" }} /> */}
             {!loggedin && (
               <Button
                 variant="contained"

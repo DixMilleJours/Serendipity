@@ -169,8 +169,8 @@ function SearchBar({ loggedin, setError }) {
   };
 
   const flightData = {
-    departure: departure,
-    destination: destination,
+    departure: travels[4],
+    destination: travels[5],
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     travelDetails: travels
@@ -178,7 +178,7 @@ function SearchBar({ loggedin, setError }) {
 
   const hotelData = {
     rating: rate,
-    destination: destination,
+    destination: travels[5],
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     rooms: hotels[0],
@@ -191,11 +191,11 @@ function SearchBar({ loggedin, setError }) {
   }
 
   const handleClickV2 = async () => {
-    // console.log({
-    //   flightData,
-    //   hotelData,
-    //   userPreference
-    // })
+    console.log({
+      flightData,
+      hotelData,
+      userPreference
+    })
     try {
       setStorage("")
     const functionss = getFunctions();
@@ -352,7 +352,7 @@ function SearchBar({ loggedin, setError }) {
                           <React.Fragment>
                             <Box
                               sx={{
-                                marginTop: "15px",
+                                marginTop: "25px",
                                 marginLeft: "20px",
                                 textAlign: "center",
                                 alignItems: "center",
@@ -432,8 +432,8 @@ function SearchBar({ loggedin, setError }) {
                           <React.Fragment>
                             <Box
                               sx={{
-                                marginLeft: "40px",
-                                marginTop: "15px",
+                                marginLeft: "0px",
+                                marginTop: "25px",
                                 textAlign: "center",
                                 alignItems: "center",
                                 pl: 2,
@@ -486,15 +486,15 @@ function SearchBar({ loggedin, setError }) {
                             label="Dining Preference"
                             onChange={handleChangeDiningPreference}
                           >
-                            <MenuItem value={"Chinese"}>Chinese</MenuItem>
-                            <MenuItem value={"Korean"}>Korean</MenuItem>
-                            <MenuItem value={"French"}>French</MenuItem>
-                            <MenuItem value={"Indian"}>Indian</MenuItem>
-                            <MenuItem value={"Japanese"}>Japanese</MenuItem>
-                            <MenuItem value={"Mexican"}>Mexican</MenuItem>
-                            <MenuItem value={"Thai"}>Thai</MenuItem>
-                            <MenuItem value={"American"}>American</MenuItem>
-                            <MenuItem value={"Greek"}>Greek</MenuItem>
+                            <MenuItem value={"Chinese"}>🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese</MenuItem>
+                            <MenuItem value={"Korean"}>🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean</MenuItem>
+                            <MenuItem value={"French"}>🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French</MenuItem>
+                            <MenuItem value={"Indian"}>🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian</MenuItem>
+                            <MenuItem value={"Japanese"}>🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese</MenuItem>
+                            <MenuItem value={"Mexican"}>🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican</MenuItem>
+                            <MenuItem value={"Thai"}>🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai</MenuItem>
+                            <MenuItem value={"American"}>🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American</MenuItem>
+                            <MenuItem value={"Greek"}>🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek</MenuItem>
                           </Select>
                         </FormControl>
                       </Box>
@@ -512,15 +512,16 @@ function SearchBar({ loggedin, setError }) {
                             label="Trip Preference"
                             onChange={handleChangePOI}
                           >
-                            <MenuItem value={"park"}>park</MenuItem>
-                            <MenuItem value={"art_gallery"}>art gallery</MenuItem>
-                            <MenuItem value={"campground"}>campground</MenuItem>
-                            <MenuItem value={"church"}>church</MenuItem>
-                            <MenuItem value={"zoo"}>zoo</MenuItem>
-                            <MenuItem value={"university"}>university</MenuItem>
-                            <MenuItem value={"shopping_mall"}>shopping mall</MenuItem>
-                            <MenuItem value={"museum"}>museum</MenuItem>
-                            <MenuItem value={"bar"}>bar</MenuItem>
+
+                            <MenuItem value={"park"}>🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park</MenuItem>
+                            <MenuItem value={"art_gallery"}>🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art Gallery</MenuItem>
+                            <MenuItem value={"campground"}>⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground</MenuItem>
+                            <MenuItem value={"church"}>⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church</MenuItem>
+                            <MenuItem value={"zoo"}>🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo</MenuItem>
+                            <MenuItem value={"university"}>🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University</MenuItem>
+                            <MenuItem value={"shopping_mall"}>🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping Mall</MenuItem>
+                            <MenuItem value={"museum"}>🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum</MenuItem>
+                            <MenuItem value={"bar"}>🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar</MenuItem>
                           </Select>
                         </FormControl>
                       </Box>
