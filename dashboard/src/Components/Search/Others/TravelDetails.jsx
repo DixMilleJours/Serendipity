@@ -194,12 +194,14 @@ function TravelDetails({ setTravelModalOpen, setTravelDetails }) {
                     <TravelDeparture
                       placeholder={"Departure"}
                       setDeparture = {setDeparture}
+                      defaultValue = {departure}
                     />
                   </FormControl>
                   <FormControl style={{ marginTop: "20px" }}>
                     <TravelDestination
                       placeholder={"Destination"}
                       setDestination = {setDestination}
+                      defaultValue = {destination}
                     />
                   </FormControl>
 

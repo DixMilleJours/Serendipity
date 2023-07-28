@@ -171,8 +171,8 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
   const destination = useSelector((state) => state.destination);
   const hotels = useSelector((state) => state.hotels);
   const [room, setRooms] = React.useState(hotels[0]);
-  const [adults, setAdults] = React.useState(hotels[1]);
-  const [children, setChildren] = React.useState(hotels[2]);
+  // const [adults, setAdults] = React.useState(hotels[1]);
+  // const [children, setChildren] = React.useState(hotels[2]);
 
   React.useEffect(() => {
     if (preferredMode === "dark") {
@@ -183,7 +183,7 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
   }, []);
 
   function handleClose() {
-    dispatch(setHotel({ room: room, adults: adults, children: children }));
+    dispatch(setHotel({ room: room }));
     setModalOpen(false);
     setHotelDetails(true);
   }
@@ -198,22 +198,22 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
     setRooms(room + 1);
   }
 
-  function removeAdults() {
-    if (adults > 0) {
-      setAdults(adults - 1);
-    }
-  }
-  function removeChildren() {
-    if (children > 0) {
-      setChildren(children - 1);
-    }
-  }
-  function addAdults() {
-    setAdults(adults + 1);
-  }
-  function addChildren() {
-    setChildren(children + 1);
-  }
+  // function removeAdults() {
+  //   if (adults > 0) {
+  //     setAdults(adults - 1);
+  //   }
+  // }
+  // function removeChildren() {
+  //   if (children > 0) {
+  //     setChildren(children - 1);
+  //   }
+  // }
+  // function addAdults() {
+  //   setAdults(adults + 1);
+  // }
+  // function addChildren() {
+  //   setChildren(children + 1);
+  // }
 
 
   return (
@@ -226,7 +226,7 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
       >
       
       <div
-        className="modalContainer modalBackground"
+        className="hotelModalContainer modalBackground"
         style={{ backgroundColor: containerColor }}
       > 
 
@@ -263,14 +263,14 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
                       onClick={addRooms}
                     />
                   </Box>
-                  <Box
+                  {/* <Box
                     display="flex"
                     flexDirection="row"
                     textAlign="center"
                     alignItems="center"
                     marginTop="30px"
-                  >
-                    <span>Adults</span>&nbsp;
+                  > */}
+                    {/* <span>Adults</span>&nbsp;
                     <RemoveCircleOutlineIcon
                       sx={{ color: pink[500] }}
                       onClick={removeAdults}
@@ -290,8 +290,8 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
                     <AddCircleIcon
                       sx={{ color: pink[500] }}
                       onClick={addChildren}
-                    />
-                  </Box>
+                    /> */}
+                  {/* </Box> */}
 
                   <FormControl style={{ marginTop: "40px" }}>
                     <Location
