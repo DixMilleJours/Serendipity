@@ -26,6 +26,12 @@ import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLocation } from "../../state";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+
+import MenuItem from '@mui/material/MenuItem';
+
 import {
   httpsCallable,
   getFunctions,
@@ -65,12 +71,26 @@ function SearchBar({ loggedin, setError }) {
   const hotels = useSelector((state) => state.hotels); // array
 
   // Preference
-  const [food, setFood] = React.useState("");
+  const [food, setFood] =React.useState("");
   const [POI, setPOI] = React.useState("");
 
   function setEditorColor() {
     setIconColor(blueGrey[900]);
   }
+
+  const handleChangeDiningPreference = (event) => {
+    setFood(event.target.value);
+  };
+
+  const handleChangePOI =(event) =>{
+    setPOI(event.target.value);
+  }
+
+  const splitContent = (content) => {
+    // Regular expression to match the day numbers (assuming they are in the format "Day X")
+    const dayRegex = /Day\s+\d+:\s+/g;
+    return content.split(dayRegex);
+  };
 
   async function generateTrip(e) {
     e.preventDefault();
@@ -171,17 +191,17 @@ function SearchBar({ loggedin, setError }) {
   const handleClickV2 = async () => {
     try {
       setStorage("")
-      const functionss = getFunctions();
-      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-      const generator = httpsCallable(functionss, "generator");
-      const finalResult = await generator({
-        flightData,
-        hotelData,
-        userPreference
-      });
-      // Read result of the Cloud Function.
-      const result = finalResult.data.finalResult;
-      setStorage(result)
+    const functionss = getFunctions();
+    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+    const generator = httpsCallable(functionss, "generator");
+    const finalResult = await generator({
+      flightData,
+      hotelData,
+      userPreference
+    });
+    // Read result of the Cloud Function.
+    const result = finalResult.data.finalResult;
+    setStorage(result)
     } catch (error) {
       console.error(`Error in handleClickV2: ${error.message}`);
       // Set error message in storage
@@ -468,22 +488,54 @@ function SearchBar({ loggedin, setError }) {
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Dining preference"
-                          onChange={(event) => {
-                            setFood(event.target.value);
-                          }}
-                        ></TextField>
+                      <Box sx={{ minWidth: 210 }}>
+                        <FormControl fullWidth>
+                          <InputLabel id="demo-simple-select-label">Dining Preference</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={food}
+                            label="Dining Preference"
+                            onChange={handleChangeDiningPreference}
+                          >
+                            <MenuItem value={10}>Chinese</MenuItem>
+                            <MenuItem value={20}>Korean</MenuItem>
+                            <MenuItem value={30}>French</MenuItem>
+                            <MenuItem value={40}>Indian</MenuItem>
+                            <MenuItem value={50}>Japanese</MenuItem>
+                            <MenuItem value={60}>Mexican</MenuItem>
+                            <MenuItem value={70}>Thai</MenuItem>
+                            <MenuItem value={80}>American</MenuItem>
+                            <MenuItem value={90}>Greek</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
                       </Item>
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <TextField
-                          label="Trip preference"
-                          onChange={(event) => {
-                            setPOI(event.target.value);
-                          }}
-                        ></TextField>
+                      <Box sx={{ minWidth: 210 }}>
+                        <FormControl fullWidth>
+                          <InputLabel id="demo-simple-select-label">Trip Preference</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={POI}
+                            label="Trip Preference"
+                            onChange={handleChangePOI}
+                          >
+                            <MenuItem value={10}>park</MenuItem>
+                            <MenuItem value={20}>art_gallery</MenuItem>
+                            <MenuItem value={30}>campground</MenuItem>
+                            <MenuItem value={40}>church</MenuItem>
+                            <MenuItem value={50}>zoo</MenuItem>
+                            <MenuItem value={60}>university</MenuItem>
+                            <MenuItem value={70}>store</MenuItem>
+                            <MenuItem value={80}>museum</MenuItem>
+                            <MenuItem value={90}>bar</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
                       </Item>
                     </Grid>
                   </Grid>
@@ -503,16 +555,25 @@ function SearchBar({ loggedin, setError }) {
                   </Button>
                   {storage && (
                     <Grid container spacing={2.5}>
-                      <Grid xs={12} flexDirection="row">
+                      <Grid xs={12} flexDirection="column">
                         <Item
                           style={{
                             display: "flex",
-                            flexDirection: "row",
+                            flexDirection: "column",
                             marginRight: "2px",
                           }}
                         >
                           <hr></hr>
-                          <p>{storage}</p>
+                          {splitContent(storage).map((part, index) => (
+                          <div key={index} style={{
+                            fontSize: "16px",
+                            color: "#FFFFFF",
+                          }}>
+                 
+                          {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
+                          {part}
+                        </div>
+                         ))}
                         </Item>
                       </Grid>
                     </Grid>
