@@ -88,7 +88,8 @@ function SearchBar({ loggedin, setError }) {
 
   const splitContent = (content) => {
     // Regular expression to match the day numbers (assuming they are in the format "Day X")
-    const dayRegex = /Day\s+\d+ [^:]+:\s+/g;
+    const dayRegex = /Day\s?\d+[0-9a-zA-Z+-/*=%&|!@#$^/(/)]?\s?:?\s?/g;
+    // console.log(content)
     return content.split(dayRegex);
   };
 
@@ -531,12 +532,12 @@ function SearchBar({ loggedin, setError }) {
                             onChange={handleChangePOI}
                           >
                             <MenuItem value={"park"}>park</MenuItem>
-                            <MenuItem value={"art_gallery"}>art_gallery</MenuItem>
+                            <MenuItem value={"art_gallery"}>art gallery</MenuItem>
                             <MenuItem value={"campground"}>campground</MenuItem>
                             <MenuItem value={"church"}>church</MenuItem>
                             <MenuItem value={"zoo"}>zoo</MenuItem>
                             <MenuItem value={"university"}>university</MenuItem>
-                            <MenuItem value={"store"}>store</MenuItem>
+                            <MenuItem value={"shopping_mall"}>shopping mall</MenuItem>
                             <MenuItem value={"museum"}>museum</MenuItem>
                             <MenuItem value={"bar"}>bar</MenuItem>
                           </Select>
@@ -573,7 +574,7 @@ function SearchBar({ loggedin, setError }) {
                           {splitContent(storage).map((part, index) => (
                           <div key={index} style={{
                             fontSize: "16px",
-                            color: "#FFFFFF",
+                            // color: "#FFFFFF",
                           }}>
                  
                           {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
