@@ -152,42 +152,47 @@ function SearchBar({ loggedin, setError }) {
     destination: destination,
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    travelDetails: travels
-  }
+    travelDetails: travels,
+  };
 
   const hotelData = {
     rating: rate,
     destination: destination,
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    hotelDetails: hotels
-  }
+    hotelDetails: hotels,
+  };
 
   const userPreference = {
     restaurant: food,
     poi: POI,
-  }
+  };
 
   const handleClickV2 = async () => {
     try {
-      setStorage("")
+      setStorage("");
       const functionss = getFunctions();
       connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
       const generator = httpsCallable(functionss, "generator");
       const finalResult = await generator({
         flightData,
         hotelData,
-        userPreference
+        userPreference,
       });
       // Read result of the Cloud Function.
       const result = finalResult.data.finalResult;
-      setStorage(result)
+      setStorage(result);
     } catch (error) {
       console.error(`Error in handleClickV2: ${error.message}`);
       // Set error message in storage
-      setStorage("An error occurred. Please re-enter your information and try again.");
+      // setStorage("An error occurred. Please re-enter your information and try again.");
+      setError({
+        open: true,
+        content:
+          "An error occurred. Please re-enter your information and try again",
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -205,7 +210,7 @@ function SearchBar({ loggedin, setError }) {
               if (loggedin == true) {
                 setLoading(true);
                 setVisible(false);
-              }else{
+              } else {
                 setError({
                   open: true,
                   content: "Login is required to view the trip generator",
