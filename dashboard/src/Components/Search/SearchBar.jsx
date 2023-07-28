@@ -168,8 +168,8 @@ function SearchBar({ loggedin, setError }) {
   };
 
   const flightData = {
-    departure: departure,
-    destination: destination,
+    departure: travels[4],
+    destination: travels[5],
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     travelDetails: travels
@@ -177,7 +177,7 @@ function SearchBar({ loggedin, setError }) {
 
   const hotelData = {
     rating: rate,
-    destination: destination,
+    destination: travels[5],
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     rooms: hotels[0],
