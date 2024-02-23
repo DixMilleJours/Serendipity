@@ -31,6 +31,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 
 import MenuItem from '@mui/material/MenuItem';
+import ReactMarkdown from 'react-markdown';
 
 import {
   httpsCallable,
@@ -208,6 +209,7 @@ function SearchBar({ loggedin, setError }) {
     });
     // Read result of the Cloud Function.
     const result = finalResult.data.finalResult;
+    console.log(result)
     setStorage(result)
     } catch (error) {
       console.error(`Error in handleClickV2: ${error.message}`);
@@ -553,16 +555,19 @@ function SearchBar({ loggedin, setError }) {
                           }}
                         >
                           <hr></hr>
-                          {splitContent(storage).map((part, index) => (
+                          <ReactMarkdown style={{ color: 'black' }}>
+                            {storage}
+                          </ReactMarkdown>
+                          {/* splitContent(storage).map((part, index) => (
                           <div key={index} style={{
                             fontSize: "16px",
                             // color: "#FFFFFF",
                           }}>
                  
                           {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
-                          {part}
-                        </div>
-                         ))}
+                          <ReactMarkdown children={part} />
+                          </div>))
+                          */}
                         </Item>
                       </Grid>
                     </Grid>
