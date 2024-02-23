@@ -209,7 +209,6 @@ function SearchBar({ loggedin, setError }) {
     });
     // Read result of the Cloud Function.
     const result = finalResult.data.finalResult;
-    console.log(result)
     setStorage(result)
     } catch (error) {
       console.error(`Error in handleClickV2: ${error.message}`);
