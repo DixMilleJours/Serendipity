@@ -9,7 +9,7 @@ const { Configuration, OpenAIApi } = require("openai");
 
 // Setup OpenAI API configuration with the fetched OpenAI key
 const configuration = new Configuration({
-    apiKey: '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',
+    apiKey: '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',
 });
 
 // const placeAPIKey = '5ae2e3f221c38a28845f05b63e357b1b0a0ade8195a1ccd5ba27738b'
@@ -254,7 +254,7 @@ async function searchFlight(data) {
         }
         let flightRes = response.data.map(item => ({
             departureFlightCode: item.validatingAirlineCodes[0] + item.itineraries[0].segments[0].number,
-            returnFlightCode:  item.validatingAirlineCodes[0] + item.itineraries[1].segments[0].number,
+            returnFlightCode: item.validatingAirlineCodes[0] + item.itineraries[1].segments[0].number,
             currency: item.price.currency,
             price: item.price.grandTotal,
             // go_duration: item.itineraries[0].duration,
@@ -276,7 +276,7 @@ async function searchFlight(data) {
     }
 }
 
-async function gpt({flight, hotel, restaurant, poi, start, end, foodPref, poiPref}) {
+async function gpt({ flight, hotel, restaurant, poi, start, end, foodPref, poiPref }) {
 
     // !!!! budget is an array of 2 numbers, so will need to change the prompt.
     const prompt = `Given JSON data for the flight ${JSON.stringify(flight)}, the hotel ${JSON.stringify(hotel)}, the restaurant ${JSON.stringify(restaurant)}, and the tourist attraction ${JSON.stringify(poi)}, return the best itinerary in short human-readable sentence. No explanation.`;
@@ -320,7 +320,7 @@ async function gpt({flight, hotel, restaurant, poi, start, end, foodPref, poiPre
 
     try {
         const gptResponse = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4-turbo-preview',
             messages: [
                 {
                     role: 'user',
@@ -330,11 +330,11 @@ async function gpt({flight, hotel, restaurant, poi, start, end, foodPref, poiPre
         })
         return gptResponse.data.choices[0].message
     } catch (error) {
-        throw new Error(`GPT-3 API error: ${error.message}`);
+        throw new Error(`GPT-4 API error: ${error.message}`);
     }
 }
 
-async function fetchRestaurants({averageLat, averageLong, userPreference}) {
+async function fetchRestaurants({ averageLat, averageLong, userPreference }) {
     try {
         // First fetch with user preference
         const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -395,7 +395,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
     }
 }
 
-async function searchTouristAttraction({averageLat, averageLong, userPreference}) {
+async function searchTouristAttraction({ averageLat, averageLong, userPreference }) {
     try {
         const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
             params: {
@@ -461,7 +461,7 @@ exports.generator = functions.https.onCall(async (data, context) => {
         const flightData = data.flightData;
         const hotelData = data.hotelData;
         const userPreference = data.userPreference;
-        const start =  flightData.startDate;
+        const start = flightData.startDate;
         const end = flightData.endDate;
         const foodPref = userPreference.restaurant;
         const poiPref = userPreference.poi;
@@ -470,11 +470,11 @@ exports.generator = functions.https.onCall(async (data, context) => {
 
         // !!! local test for now.
         const flightPromise = searchFlight(flightData)
-        const hotelPromise =  searchHotels(hotelData)
+        const hotelPromise = searchHotels(hotelData)
         const [flightResponse, hotelResponse] = await Promise.all([flightPromise, hotelPromise]);
         const { averageLat, averageLong } = getAverageLatLong(hotelResponse);
-        const restaurantResponse = await fetchRestaurants({averageLat, averageLong, userPreference})
-        const poiResponse = await searchTouristAttraction({averageLat, averageLong, userPreference})
+        const restaurantResponse = await fetchRestaurants({ averageLat, averageLong, userPreference })
+        const poiResponse = await searchTouristAttraction({ averageLat, averageLong, userPreference })
 
         // Data cleaning before passing into gpt.
         let flight = flightResponse.map(({ go_duration, leave_duration, ...rest }) => rest);
