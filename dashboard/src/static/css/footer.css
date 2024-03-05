@@ -1,0 +1,25 @@
+/* Footer.css */
+.footer-container {
+    /* background-image: url('/path/to/your/dragon-pattern-sticker.png'); 
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    background-size: cover; 
+    position: relative; */
+    text-align: center;
+  }
+  
+  .footer-content p {
+    color: #333; /* Adjust the color as needed */
+    margin: 0 0 10px 0;
+  }
+  
+  .social-icons a {
+    margin: 0 10px;
+    color: #333; /* Icon color */
+    font-size: 24px; /* Adjust icon size as needed */
+  }
+  
+  .social-icons a:hover {
+    color: #666; /* Icon hover color */
+  }
+  
