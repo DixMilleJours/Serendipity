@@ -254,10 +254,10 @@ function SearchBar({ loggedin, setError, setSelected }) {
       setItineraries([...itineraries, newItinerary]);
     } catch (error) {
       setProgress(false);
-      console.error(`Error in handleClickV2: ${error.message}`);
+      console.error(`${error.message}`);
       // Set error message in storage
       setStorage(
-        "An error occurred. Please re-enter your information and try again."
+        error.message
       );
     }
   };

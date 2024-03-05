@@ -196,7 +196,7 @@ async function searchHotels(data) {
         })
         // Error handling.
         if (!response1.data.length) {
-            throw new Error('No hotels found');
+            throw new Error('No hotels found for the selected criteria.');
         }
         // Limit hotel count to 10.
         var limitedHotels = response1.data.slice(0, 10);
@@ -217,7 +217,7 @@ async function searchHotels(data) {
         })
         // Error handling.
         if (!response2.data.length) {
-            throw new Error('No hotel offers found');
+            throw new Error('No hotel offerings found for the selected criteria.');
         }
         let hotelRes = response2.data.map((hotel) => ({
             // hotelId: hotel.hotel.hotelId,
@@ -230,7 +230,7 @@ async function searchHotels(data) {
         }))
         return hotelRes
     } catch (error) {
-        throw new Error(`search hotels error: ${error.message}`);
+        throw new Error('No hotel offerings found for the selected criteria.');
     }
 }
 
@@ -250,7 +250,7 @@ async function searchFlight(data) {
         })
         // Error handling.
         if (!response.data.length) {
-            throw new Error('No flights found');
+            throw new Error('No flights found for the selected criteria.');
         }
         let flightRes = response.data.map(item => ({
             departureFlightCode: item.validatingAirlineCodes[0] + item.itineraries[0].segments[0].number,
@@ -272,7 +272,7 @@ async function searchFlight(data) {
         }))
         return flightRes
     } catch (error) {
-        throw new Error(`search flights API error: ${error.message}`);
+        throw new Error("No flights found for the selected criteria.");
     }
 }
 
@@ -315,7 +315,19 @@ async function gpt({ flight, hotel, restaurant, poi, start, end, foodPref, poiPr
     - Restaurants: ${JSON.stringify(restaurant)}
     - Tourist Attractions: ${JSON.stringify(poi)}
 
-    The response should be formatted using line breaks or special characters for better readability when displayed on the front-end UI.`;
+    The response should be formatted using line breaks or special characters for better readability when displayed on the front-end UI.
+    After that, the final response must be in JSON format. This JSON response must follow the below format:
+    response = [
+        title: // The title of this itinerary. This must be an individual key-value pair not inside the following key-value pairs.
+        {
+            day: // The day number and its corresponding date.
+            activities: [
+            ] // A list of all activities happening in this day. Notice the activities are separated based on the line breaks.
+        },
+        {
+        } // Same as above for the next day.
+        ending: // The ending sentence summarizing this itinerary. This must be an individual key-value pair not inside the above key-value pairs.
+    ]`;
 
 
     try {
@@ -326,11 +338,12 @@ async function gpt({ flight, hotel, restaurant, poi, start, end, foodPref, poiPr
                     role: 'user',
                     content: promptV3
                 }
-            ]
+            ],
+            temperature: 0.1
         })
         return gptResponse.data.choices[0].message
     } catch (error) {
-        throw new Error(`GPT-4 API error: ${error.message}`);
+        throw new Error('We encountered a problem while recommending the itinerary. Please try again.');
     }
 }
 
@@ -381,7 +394,7 @@ async function fetchRestaurants({ averageLat, averageLong, userPreference }) {
 
         // Error handling.
         if (!finalResults.length) {
-            throw new Error('No restaurants found');
+            throw new Error('No restaurants found for the selected criteria.');
         }
         let restaurantRes = finalResults.map((res) => ({
             resName: res.name,
@@ -391,7 +404,7 @@ async function fetchRestaurants({ averageLat, averageLong, userPreference }) {
         }))
         return restaurantRes
     } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
+        throw new Error('No restaurants found for the selected criteria.');
     }
 }
 
@@ -440,7 +453,7 @@ async function searchTouristAttraction({ averageLat, averageLong, userPreference
 
         // Error handling.
         if (!finalResults.length) {
-            throw new Error('No attractions found');
+            throw new Error('No attractions found for the selected criteria.');
         }
         let touristAttractionRes = finalResults.map((data) => ({
             touristAttractionName: data.name,
@@ -450,7 +463,7 @@ async function searchTouristAttraction({ averageLat, averageLong, userPreference
         }))
         return touristAttractionRes
     } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
+        throw new Error('No tourist attractions found for the selected criteria.');
     }
 }
 
@@ -496,7 +509,7 @@ exports.generator = functions.https.onCall(async (data, context) => {
         return { finalResult: finalResult }
     } catch (error) {
         console.error(error);
-        throw new functions.https.HttpsError('unknown', error.message);
+        throw new functions.https.HttpsError('internal', error.message);
     }
 })
 
