@@ -39,7 +39,11 @@ function getAirportCode(fullString) {
   return description;
 }
 
-export default function TravelDeparture({ placeholder, setDeparture, defaultValue }) {
+export default function TravelDeparture({
+  placeholder,
+  setDeparture,
+  defaultValue,
+}) {
   const [value, setValue] = React.useState(defaultValue);
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState([]);
@@ -131,13 +135,19 @@ export default function TravelDeparture({ placeholder, setDeparture, defaultValu
         <TextField {...params} label={placeholder} fullWidth />
       )}
       renderOption={(props, option) => {
-        const matches =
-          option.structured_formatting.main_text_matched_substrings || [];
+        // Initialize parts to an empty array in case structured_formatting is not defined
+        let parts = [];
 
-        const parts = parse(
-          option.structured_formatting.main_text,
-          matches.map((match) => [match.offset, match.offset + match.length])
-        );
+        // Check if structured_formatting exists and is not null
+        if (option.structured_formatting) {
+          const matches =
+            option.structured_formatting.main_text_matched_substrings || [];
+
+          parts = parse(
+            option.structured_formatting.main_text,
+            matches.map((match) => [match.offset, match.offset + match.length])
+          );
+        }
 
         return (
           <li {...props}>

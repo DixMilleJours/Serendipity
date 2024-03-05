@@ -19,19 +19,21 @@ import TravelInfo from "./Others/TravelInfo";
 import HotelInfo from "./Others/HotelInfo";
 import { useAuth } from "../../AuthContext";
 import SendIcon from "@mui/icons-material/Send";
-import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLocation } from "../../state";
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 
-import MenuItem from '@mui/material/MenuItem';
-import ReactMarkdown from 'react-markdown';
+import MenuItem from "@mui/material/MenuItem";
+import ReactMarkdown from "react-markdown";
+
+import Itinerary from "../Display/ItineraryCard";
 
 import {
   httpsCallable,
@@ -49,7 +51,25 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-function SearchBar({ loggedin, setError }) {
+const itineraryDays = [
+  {
+    day: 1,
+    title: "Welcome to New York",
+    activities: [
+      { time: "Check-in", description: "Hotel on Rivington at 2024-03-01." },
+      {
+        time: "Dinner",
+        description:
+          "Enjoy your first meal at Tomo, where the 4.2 rating promises a delightful Japanese dining experience.",
+      },
+      // Add more activities here
+    ],
+  },
+  // Repeat for each day
+];
+
+function SearchBar({ loggedin, setError, setSelected }) {
+  const [isProgress, setProgress] = React.useState(false);
   const [isLoading, setLoading] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
   const [destination, setDestination] = React.useState("");
@@ -63,6 +83,7 @@ function SearchBar({ loggedin, setError }) {
   const [isTravelModalOpen, setTravelModalOpen] = React.useState(false);
   const [isHotelDetails, setHotelDetails] = React.useState(false);
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
+  const [itineraries, setItineraries] = React.useState([]);
 
   const dispatch = useDispatch();
   const defaultDestination = useSelector((state) => state.destination);
@@ -72,7 +93,7 @@ function SearchBar({ loggedin, setError }) {
   const hotels = useSelector((state) => state.hotels); // array
 
   // Preference
-  const [food, setFood] =React.useState("");
+  const [food, setFood] = React.useState("");
   const [POI, setPOI] = React.useState("");
 
   function setEditorColor() {
@@ -83,9 +104,19 @@ function SearchBar({ loggedin, setError }) {
     setFood(event.target.value);
   };
 
-  const handleChangePOI =(event) =>{
+  const handleChangePOI = (event) => {
     setPOI(event.target.value);
-  }
+  };
+
+  const deleteItinerary = (indexToDelete) => {
+    // Filter out the itinerary at the given index
+    const newItineraries = itineraries.filter(
+      (_, index) => index !== indexToDelete
+    );
+    console.log('delete');
+    // Update the state with the new array
+    setItineraries(newItineraries);
+  };
 
   const splitContent = (content) => {
     // Regular expression to match the day numbers (assuming they are in the format "Day X")
@@ -174,8 +205,8 @@ function SearchBar({ loggedin, setError }) {
     destination: travels[5],
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
-    travelDetails: travels
-  }
+    travelDetails: travels,
+  };
 
   const hotelData = {
     rating: rate,
@@ -183,39 +214,53 @@ function SearchBar({ loggedin, setError }) {
     startDate: dayjs(oStartDate).format("YYYY-MM-DD"),
     endDate: dayjs(oEndDate).format("YYYY-MM-DD"),
     rooms: hotels[0],
-    adults: travels[2]
-  }
+    adults: travels[2],
+  };
 
   const userPreference = {
     restaurant: food,
     poi: POI,
-  }
+  };
 
   const handleClickV2 = async () => {
     console.log({
       flightData,
       hotelData,
-      userPreference
-    })
-    try {
-      setStorage("")
-    const functionss = getFunctions();
-    connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-    const generator = httpsCallable(functionss, "generator");
-    const finalResult = await generator({
-      flightData,
-      hotelData,
-      userPreference
+      userPreference,
     });
-    // Read result of the Cloud Function.
-    const result = finalResult.data.finalResult;
-    setStorage(result)
+    try {
+      setStorage("");
+      setProgress(true);
+      const functionss = getFunctions();
+      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+      const generator = httpsCallable(functionss, "generator");
+      const finalResult = await generator({
+        flightData,
+        hotelData,
+        userPreference,
+      });
+      // Read result of the Cloud Function.
+      const result = finalResult.data.finalResult;
+      console.log(result);
+      setProgress(false);
+      setStorage(result);
+
+      const newItinerary = {
+        // ... your itinerary data here
+        result,
+      };
+
+      // Add the new itinerary to the array of itineraries
+      setItineraries([...itineraries, newItinerary]);
     } catch (error) {
+      setProgress(false);
       console.error(`Error in handleClickV2: ${error.message}`);
       // Set error message in storage
-      setStorage("An error occurred. Please re-enter your information and try again.");
+      setStorage(
+        "An error occurred. Please re-enter your information and try again."
+      );
     }
-  }
+  };
 
   return (
     <>
@@ -231,9 +276,10 @@ function SearchBar({ loggedin, setError }) {
             }}
             onClick={() => {
               if (loggedin == true) {
+                setSelected(true);
                 setLoading(true);
                 setVisible(false);
-              }else{
+              } else {
                 setError({
                   open: true,
                   content: "Login is required to view the trip generator",
@@ -474,75 +520,126 @@ function SearchBar({ loggedin, setError }) {
                       </Item>
                     </Grid>
                     {/* Temporary Addition */}
-                   
+
                     <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                      <Box sx={{ minWidth: 210 }}>
-                        <FormControl fullWidth>
-                          <InputLabel id="demo-simple-select-label">Dining Preference</InputLabel>
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={food}
-                            label="Dining Preference"
-                            onChange={handleChangeDiningPreference}
-                          >
-                            <MenuItem value={"Chinese"}>🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese</MenuItem>
-                            <MenuItem value={"Korean"}>🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean</MenuItem>
-                            <MenuItem value={"French"}>🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French</MenuItem>
-                            <MenuItem value={"Indian"}>🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian</MenuItem>
-                            <MenuItem value={"Japanese"}>🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese</MenuItem>
-                            <MenuItem value={"Mexican"}>🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican</MenuItem>
-                            <MenuItem value={"Thai"}>🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai</MenuItem>
-                            <MenuItem value={"American"}>🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American</MenuItem>
-                            <MenuItem value={"Greek"}>🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Box>
+                      <Item style={{ display: "flex", flexDirection: "row",  }}>
+                        <Box sx={{ minWidth: 210 }}>
+                          <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">
+                              Dining Preference
+                            </InputLabel>
+                            <Select
+                              labelId="demo-simple-select-label"
+                              id="demo-simple-select"
+                              value={food}
+                              label="Dining Preference"
+                              onChange={handleChangeDiningPreference}
+                            >
+                              <MenuItem value={"Chinese"}>
+                                🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese
+                              </MenuItem>
+                              <MenuItem value={"Korean"}>
+                                🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean
+                              </MenuItem>
+                              <MenuItem value={"French"}>
+                                🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French
+                              </MenuItem>
+                              <MenuItem value={"Indian"}>
+                                🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian
+                              </MenuItem>
+                              <MenuItem value={"Japanese"}>
+                                🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese
+                              </MenuItem>
+                              <MenuItem value={"Mexican"}>
+                                🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican
+                              </MenuItem>
+                              <MenuItem value={"Thai"}>
+                                🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai
+                              </MenuItem>
+                              <MenuItem value={"American"}>
+                                🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American
+                              </MenuItem>
+                              <MenuItem value={"Greek"}>
+                                🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek
+                              </MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
                       </Item>
                     </Grid>
                     <Grid xs={6}>
                       <Item style={{ display: "flex", flexDirection: "row" }}>
-                      <Box sx={{ minWidth: 210 }}>
-                        <FormControl fullWidth>
-                          <InputLabel id="demo-simple-select-label">Trip Preference</InputLabel>
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={POI}
-                            label="Trip Preference"
-                            onChange={handleChangePOI}
-                          >
-
-                            <MenuItem value={"park"}>🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park</MenuItem>
-                            <MenuItem value={"art_gallery"}>🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art Gallery</MenuItem>
-                            <MenuItem value={"campground"}>⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground</MenuItem>
-                            <MenuItem value={"church"}>⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church</MenuItem>
-                            <MenuItem value={"zoo"}>🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo</MenuItem>
-                            <MenuItem value={"university"}>🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University</MenuItem>
-                            <MenuItem value={"shopping_mall"}>🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping Mall</MenuItem>
-                            <MenuItem value={"museum"}>🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum</MenuItem>
-                            <MenuItem value={"bar"}>🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Box>
+                        <Box sx={{ minWidth: 210 }}>
+                          <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">
+                              Trip Preference
+                            </InputLabel>
+                            <Select
+                              labelId="demo-simple-select-label"
+                              id="demo-simple-select"
+                              value={POI}
+                              label="Trip Preference"
+                              onChange={handleChangePOI}
+                            >
+                              <MenuItem value={"park"}>
+                                🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park
+                              </MenuItem>
+                              <MenuItem value={"art_gallery"}>
+                                🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art
+                                Gallery
+                              </MenuItem>
+                              <MenuItem value={"campground"}>
+                                ⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground
+                              </MenuItem>
+                              <MenuItem value={"church"}>
+                                ⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church
+                              </MenuItem>
+                              <MenuItem value={"zoo"}>
+                                🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo
+                              </MenuItem>
+                              <MenuItem value={"university"}>
+                                🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University
+                              </MenuItem>
+                              <MenuItem value={"shopping_mall"}>
+                                🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping
+                                Mall
+                              </MenuItem>
+                              <MenuItem value={"museum"}>
+                                🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum
+                              </MenuItem>
+                              <MenuItem value={"bar"}>
+                                🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar
+                              </MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
                       </Item>
                     </Grid>
                   </Grid>
                   {/* </Box> */}
-                  <Button
-                    sx={{
-                      width: "150px",
-                      marginTop: "50px",
-                      textAlign: "center",
-                      alignContent: "center",
-                    }}
-                    variant="contained"
-                    endIcon={<SendIcon />}
-                    onClick={handleClickV2}
-                  >
-                    Let's go!
-                  </Button>
+                  {isProgress && (
+                    <Box sx={{ marginTop: "50px" }}>
+                      <CircularProgress />
+                    </Box>
+                  )}
+                  {!isProgress && (
+                    <Button
+                      sx={{
+                        width: "150px",
+                        marginTop: "50px",
+                        textAlign: "center",
+                        alignContent: "center",
+                      }}
+                      variant="contained"
+                      endIcon={<SendIcon />}
+                      onClick={handleClickV2}
+                    >
+                      Let's go!
+                    </Button>
+                  )}
+
+                  {/* =============================== PARSING RESULTS ========================= */}
+
                   {storage && (
                     <Grid container spacing={2.5}>
                       <Grid xs={12} flexDirection="column">
@@ -554,23 +651,33 @@ function SearchBar({ loggedin, setError }) {
                           }}
                         >
                           <hr></hr>
-                          <ReactMarkdown style={{ color: 'black' }}>
+                          <ReactMarkdown style={{ color: "black" }}>
                             {storage}
                           </ReactMarkdown>
-                          {/* splitContent(storage).map((part, index) => (
-                          <div key={index} style={{
-                            fontSize: "16px",
-                            // color: "#FFFFFF",
-                          }}>
-                 
-                          {index > 0 ? (<div>  <p> Day {index} </p> </div>) : (<br/>)}
-                          <ReactMarkdown children={part} />
-                          </div>))
-                          */}
                         </Item>
                       </Grid>
                     </Grid>
                   )}
+                  <div style={{ height: 40 }}></div>
+                  {/* Render each itinerary */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    {itineraries.map((index, itinerary) => (
+                      <div style={{ marginLeft: "20px" }}>
+                        <Itinerary
+                          key={index}
+                          id={index}
+                          itineraryDays={itinerary}
+                          onDelete={() => deleteItinerary(index)}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </form>
               </div>
             </div>

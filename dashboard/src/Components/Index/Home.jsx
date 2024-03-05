@@ -11,13 +11,13 @@ import "../../index.css";
 import "../../static/css/login.css";
 import { useAuth } from "../../AuthContext";
 import Canvas from "./Canvas";
-import TravelDetails from "../Search/Others/TravelDetails";
 import { useSelector } from "react-redux";
+import FeatureStacks from "../Display/FeatureStack";
 // need to use mui grid v2 for contents view
 
 export default function Home(prefer) {
   const currentUser = useAuth();
-  const [isModalOpen, setModalOpen] = React.useState(false);
+  const [isSelected, setSelected] = React.useState(false);
   const state = useSelector((state) => state.open);
   const [error, setError] = React.useState({ open: false, content: "" });
 
@@ -49,7 +49,7 @@ export default function Home(prefer) {
       >
         {error.open && (
           <Stack sx={{ width: "50%" }} spacing={2}>
-            <Slide direction="down" in={error.open} mountOnEnter unmountOnExit>
+            <Slide in={error.open} mountOnEnter unmountOnExit>
               <Alert
                 severity="error"
                 onClose={() => {
@@ -61,13 +61,21 @@ export default function Home(prefer) {
             </Slide>
           </Stack>
         )}
-        <SearchBar loggedin={currentUser != null} setError={setError} />
+        <SearchBar
+          loggedin={currentUser != null}
+          setError={setError}
+          setSelected={setSelected}
+        />
 
         {/* put other components here... */}
 
         {/* <Bounce y={20}><MediaCard /></Bounce> */}
       </Container>
-      {/* <Footer /> */}
+      
+      {!isSelected && <FeatureStacks />}
+
+      <div style={{ height: 200 }}></div>
+      <Footer />
     </>
   );
 }
