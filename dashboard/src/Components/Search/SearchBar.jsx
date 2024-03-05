@@ -156,50 +156,49 @@ function SearchBar({ loggedin, setError, setSelected }) {
   const [storage, setStorage] = React.useState();
   let navigate = useNavigate();
 
-  const handleClick = async () => {
-    // reset storage
-    setStorage();
-    setStorage();
+  // const handleClick = async () => {
+  //   // reset storage
+  //   setStorage();
+  //   setStorage();
 
-    const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-    const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-    // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-    try {
-      // reset storage
-      setStorage();
+  //   const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
+  //   const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
+  //   // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
+  //   try {
+  //     // reset storage
+  //     setStorage();
 
-      // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-      // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-      // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
+  //     // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
+  //     // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
+  //     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
 
-      // ！！！ local testing for now.
-      // const response = await axios.get(
-      //   "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
-      // );
-      // setStorage(response.data.data);
-      // Call getOptimalFlight cloud function with the flight data
-      const functions = getFunctions();
-      // !!! switch to use deployed function later
-      const functionss = getFunctions(getApp());
-      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+  //     // ！！！ local testing for now.
+  //     // const response = await axios.get(
+  //     //   "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
+  //     // );
+  //     // setStorage(response.data.data);
+  //     // Call getOptimalFlight cloud function with the flight data
+  //     const functions = getFunctions();
+  //     // !!! switch to use deployed function later
+  //     const functionss = getFunctions(getApp());
+  //     connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
 
-      const getFinalResult = httpsCallable(functionss, "generator");
-      // !!! harcode budget for now.
-      const finalResult = await getFinalResult({
-        // flightData: response.data,
-        // budget: "1000",
-      });
+  //     const getFinalResult = httpsCallable(functionss, "generator");
+  //     // !!! harcode budget for now.
+  //     const finalResult = await getFinalResult({
+  //       // flightData: response.data,
+  //       // budget: "1000",
+  //     });
 
-      // Read result of the Cloud Function.
-      const optimalResult = finalResult.data.gptResponse.content;
-      console.log(optimalResult);
-      setStorage(optimalResult);
-    } catch (error) {
-      console.error(error);
-      console.error(error);
-    }
-  };
-  
+  //     // Read result of the Cloud Function.
+  //     const optimalResult = finalResult.data.gptResponse.content;
+  //     console.log(optimalResult);
+  //     setStorage(optimalResult);
+  //   } catch (error) {
+  //     console.error(error);
+  //     console.error(error);
+  //   }
+  // };
 
   const flightData = {
     departure: travels[4],
@@ -249,7 +248,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
       });
       // Read result of the Cloud Function.
       const result = finalResult.data.finalResult;
-
+      // Remove the ```json and ``` from the string
       const jsonResult = result.replace(/^```json\s*|^```\s*|\s*```$/g, '');
       console.log(jsonResult);
       setProgress(false);
