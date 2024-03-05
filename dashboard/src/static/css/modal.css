@@ -30,7 +30,6 @@ body {
   display: flex;
   flex-direction: column;
   padding: 45px;
-
 }
 
 .modalContainer .title {

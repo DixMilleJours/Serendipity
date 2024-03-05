@@ -30,7 +30,7 @@ const FeatureStacks = () => {
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <CloudDoneIcon fontSize='large' style={{ marginRight: '20px', color: red[300] }} />
         <div>
-          <h3>Cloud Memory</h3>
+          <h3>Cloud Store</h3>
           <p>Remember your last trip details</p>
         </div>
       </div>

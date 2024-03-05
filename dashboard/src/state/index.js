@@ -8,6 +8,7 @@ const initialState = {
   destination: "",
   travels: ["", "", 0, 0, "", ""],
   hotels: [0, 0, 0],
+  travelCards: [[]]
 };
 
 export const authSlice = createSlice({
@@ -42,9 +43,16 @@ export const authSlice = createSlice({
       state.hotels[1] = isNaN(action.payload.adults) ? 0 : action.payload.adults;
       state.hotels[2] = isNaN(action.payload.children) ? 0 : action.payload.children;
     },
+    setTravelCard: (state, action) => {
+      state.travelCards.push(action.payload);
+    },
+    removeTravelCard: (state, action) => {
+      const index = action.payload;
+      state.travelCards.splice(index, 1);
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setLocation, setTravel, setHotel } =
+export const { setMode, setLogin, setLogout, setLocation, setTravel, setHotel, setTravelCard, removeTravelCard } =
   authSlice.actions;
 export default authSlice.reducer;

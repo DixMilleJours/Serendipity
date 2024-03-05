@@ -10790,6 +10790,11 @@ react-icons@^5.0.1:
   resolved "https://registry.npmjs.org/react-icons/-/react-icons-5.0.1.tgz"
   integrity sha512-WqLZJ4bLzlhmsvme6iFdgO8gfZP17rfjYEJ2m9RsZjZ+cc4k1hTzknEz63YS1MeT50kVzoa1Nz36f4BEx+Wigw==
 
+react-intersection-observer@^9.8.1:
+  version "9.8.1"
+  resolved "https://registry.npmjs.org/react-intersection-observer/-/react-intersection-observer-9.8.1.tgz"
+  integrity sha512-QzOFdROX8D8MH3wE3OVKH0f3mLjKTtEN1VX/rkNuECCff+aKky0pIjulDhr3Ewqj5el/L+MhBkM3ef0Tbt+qUQ==
+
 react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
@@ -10946,6 +10951,11 @@ react-transition-group@^4.4.5:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-wavify@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.npmjs.org/react-wavify/-/react-wavify-1.10.0.tgz"
+  integrity sha512-xd9Ruh9Kn3257T/Mr9D3qGwbTPt6+nMdqNdeXoogwwd4OSfGDc1RasNoR9DrnxYDwegUTW5UsJbbGh+krw+YQg==
 
 react@^18.2.0:
   version "18.2.0"

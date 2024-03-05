@@ -51,22 +51,21 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const itineraryDays = [
-  {
-    day: 1,
-    title: "Welcome to New York",
-    activities: [
-      { time: "Check-in", description: "Hotel on Rivington at 2024-03-01." },
-      {
-        time: "Dinner",
-        description:
-          "Enjoy your first meal at Tomo, where the 4.2 rating promises a delightful Japanese dining experience.",
-      },
-      // Add more activities here
-    ],
-  },
-  // Repeat for each day
-];
+function checkEmptyOrNull(data) {
+  for (let key in data) {
+    if (data[key] === "" || data[key] === null) {
+      return true; // Returns true if any property is an empty string or null
+    }
+
+    // If the property is an object, recursively check its properties
+    if (typeof data[key] === 'object' && !Array.isArray(data[key]) && data[key] !== null) {
+      if (checkEmptyOrNull(data[key])) {
+        return true; // Returns true if any nested property is an empty string or null
+      }
+    }
+  }
+  return false; // Returns false if no properties are empty or null
+}
 
 function SearchBar({ loggedin, setError, setSelected }) {
   const [isProgress, setProgress] = React.useState(false);
@@ -83,11 +82,12 @@ function SearchBar({ loggedin, setError, setSelected }) {
   const [isTravelModalOpen, setTravelModalOpen] = React.useState(false);
   const [isHotelDetails, setHotelDetails] = React.useState(false);
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
-  const [itineraries, setItineraries] = React.useState([]);
+  const [itineraryData, setItineraryData] = React.useState();
 
   const dispatch = useDispatch();
   const defaultDestination = useSelector((state) => state.destination);
   const defaultDeparture = useSelector((state) => state.departure);
+  const travelCards = useSelector((state) => state.travelCards);
 
   const travels = useSelector((state) => state.travels); // array
   const hotels = useSelector((state) => state.hotels); // array
@@ -108,15 +108,15 @@ function SearchBar({ loggedin, setError, setSelected }) {
     setPOI(event.target.value);
   };
 
-  const deleteItinerary = (indexToDelete) => {
-    // Filter out the itinerary at the given index
-    const newItineraries = itineraries.filter(
-      (_, index) => index !== indexToDelete
-    );
-    console.log('delete');
-    // Update the state with the new array
-    setItineraries(newItineraries);
-  };
+  // const deleteItinerary = (indexToDelete) => {
+  //   // Filter out the itinerary at the given index
+  //   const newItineraries = itineraries.filter(
+  //     (_, index) => index !== indexToDelete
+  //   );
+  //   console.log("delete");
+  //   // Update the state with the new array
+  //   setItineraries(newItineraries);
+  // };
 
   const splitContent = (content) => {
     // Regular expression to match the day numbers (assuming they are in the format "Day X")
@@ -199,6 +199,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
       console.error(error);
     }
   };
+  
 
   const flightData = {
     departure: travels[4],
@@ -223,11 +224,18 @@ function SearchBar({ loggedin, setError, setSelected }) {
   };
 
   const handleClickV2 = async () => {
-    console.log({
-      flightData,
-      hotelData,
-      userPreference,
-    });
+    // console.log({
+    //   flightData,
+    //   hotelData,
+    //   userPreference,
+    // });
+    if(checkEmptyOrNull(flightData) || checkEmptyOrNull(hotelData) || checkEmptyOrNull(userPreference)){
+      setError({
+        open: true,
+        content: "Fields should not be empty",
+      });
+      return;
+    }
     try {
       setStorage("");
       setProgress(true);
@@ -241,24 +249,22 @@ function SearchBar({ loggedin, setError, setSelected }) {
       });
       // Read result of the Cloud Function.
       const result = finalResult.data.finalResult;
-      console.log(result);
+
+      const jsonResult = result.replace(/^```json\s*|^```\s*|\s*```$/g, '');
+      console.log(jsonResult);
       setProgress(false);
-      setStorage(result);
+      setStorage(jsonResult);
 
-      const newItinerary = {
-        // ... your itinerary data here
-        result,
-      };
+      // Use the parsed array in your state
+      setItineraryData(JSON.parse(jsonResult));
 
-      // Add the new itinerary to the array of itineraries
-      setItineraries([...itineraries, newItinerary]);
     } catch (error) {
       setProgress(false);
-      console.error(`Error in handleClickV2: ${error.message}`);
-      // Set error message in storage
-      setStorage(
-        "An error occurred. Please re-enter your information and try again."
-      );
+      setError({
+        open: true,
+        content: `${error.message}`,
+      });
+
     }
   };
 
@@ -373,7 +379,10 @@ function SearchBar({ loggedin, setError, setSelected }) {
                             }}
                             variant="contained"
                             onClick={() => {
-                              if (departure === null || destination === null) {
+                              if (
+                                departure === null ||
+                                destination === null
+                              ) {
                                 setError({
                                   open: true,
                                   content:
@@ -522,7 +531,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
                     {/* Temporary Addition */}
 
                     <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row",  }}>
+                      <Item style={{ display: "flex", flexDirection: "row" }}>
                         <Box sx={{ minWidth: 210 }}>
                           <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">
@@ -639,45 +648,33 @@ function SearchBar({ loggedin, setError, setSelected }) {
                   )}
 
                   {/* =============================== PARSING RESULTS ========================= */}
-
-                  {storage && (
-                    <Grid container spacing={2.5}>
-                      <Grid xs={12} flexDirection="column">
-                        <Item
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            marginRight: "2px",
-                          }}
-                        >
-                          <hr></hr>
-                          <ReactMarkdown style={{ color: "black" }}>
-                            {storage}
-                          </ReactMarkdown>
-                        </Item>
-                      </Grid>
-                    </Grid>
-                  )}
                   <div style={{ height: 40 }}></div>
                   {/* Render each itinerary */}
-                  <div
+                  {/* <div
                     style={{
                       display: "flex",
                       flexDirection: "row",
                       alignItems: "center",
                     }}
-                  >
-                    {itineraries.map((index, itinerary) => (
-                      <div style={{ marginLeft: "20px" }}>
-                        <Itinerary
-                          key={index}
-                          id={index}
-                          itineraryDays={itinerary}
-                          onDelete={() => deleteItinerary(index)}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  > */}
+                  {/* {itineraries.map((index, itinerary) => (
+                    <div style={{ marginLeft: "20px" }}>
+                      <Itinerary
+                        key={index}
+                        itineraryData={itineraries}
+                        onDelete={() => deleteItinerary(index)}
+                      />
+                    </div>
+                  ))} */}
+                  {
+                    storage && (
+                      <Itinerary
+                        itineraryData={itineraryData}
+                        // onDelete={() => deleteItinerary(index)}
+                      />
+                    )
+                  }
+                  {/* </div> */}
                 </form>
               </div>
             </div>

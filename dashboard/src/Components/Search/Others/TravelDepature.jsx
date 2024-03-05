@@ -135,30 +135,25 @@ export default function TravelDeparture({
         <TextField {...params} label={placeholder} fullWidth />
       )}
       renderOption={(props, option) => {
-        // Initialize parts to an empty array in case structured_formatting is not defined
         let parts = [];
-
-        // Check if structured_formatting exists and is not null
-        if (option.structured_formatting) {
-          const matches =
-            option.structured_formatting.main_text_matched_substrings || [];
-
+        
+        // Check if structured_formatting exists and if main_text_matched_substrings is available
+        if (option.structured_formatting && option.structured_formatting.main_text_matched_substrings) {
+          const matches = option.structured_formatting.main_text_matched_substrings;
+      
           parts = parse(
             option.structured_formatting.main_text,
             matches.map((match) => [match.offset, match.offset + match.length])
           );
         }
-
+      
         return (
           <li {...props}>
             <Grid container alignItems="center">
               <Grid item sx={{ display: "flex", width: 44 }}>
                 <LocationOnIcon sx={{ color: "text.secondary" }} />
               </Grid>
-              <Grid
-                item
-                sx={{ width: "calc(100% - 44px)", wordWrap: "break-word" }}
-              >
+              <Grid item sx={{ width: "calc(100% - 44px)", wordWrap: "break-word" }}>
                 {parts.map((part, index) => (
                   <Box
                     key={index}
@@ -168,9 +163,11 @@ export default function TravelDeparture({
                     {part.text}
                   </Box>
                 ))}
-                <Typography variant="body2" color="text.secondary">
-                  {option.structured_formatting.secondary_text}
-                </Typography>
+                {option.structured_formatting && (
+                  <Typography variant="body2" color="text.secondary">
+                    {option.structured_formatting.secondary_text}
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </li>

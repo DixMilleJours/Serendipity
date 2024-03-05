@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -9,17 +9,31 @@ import Collapse from "@mui/material/Collapse";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import { useSelector, useDispatch } from "react-redux";
-import { pink } from "@mui/material/colors";
-import { grey } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Modal from "@mui/material/Modal";
 import NewYork from "../../static/images/newyork.webp";
-import { Box } from "@mui/material";
-import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import "../../static/css/modal.css";
+import { blueGrey, pink, teal } from "@mui/material/colors";
+import { useInView } from "react-intersection-observer";
+import Checkbox from '@mui/material/Checkbox';
+import useVisible from "./useVisible";
+
+const FadeInCard = ({ children }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.5,
+  });
+
+  return (
+    <Card ref={ref} className={`fade-in ${inView ? "fade-in-visible" : ""}`}>
+      {children}
+    </Card>
+  );
+};
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -32,7 +46,7 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
-export default function ItineraryCard({ id, itineraryData, onDelete }) {
+export default function ItineraryCard({ itineraryData = [], onDelete }) {
   const preferredMode = useSelector((state) => state.mode);
   const [expanded, setExpanded] = React.useState(false);
   const [open, setOpen] = React.useState(false); // Assuming you want to control the open state of the modal
@@ -43,11 +57,11 @@ export default function ItineraryCard({ id, itineraryData, onDelete }) {
     day: "numeric",
   });
 
-  console.log(id);
-
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+
+  console.log(itineraryData);
 
   const handleClose = () => {
     setOpen(false); // This will close the modal when invoked
@@ -57,6 +71,59 @@ export default function ItineraryCard({ id, itineraryData, onDelete }) {
   const handleOpen = () => {
     setOpen(true); // This will open the modal when invoked
   };
+
+  const [visibility, setVisibility] = useState(
+    new Array(itineraryData.length).fill(false)
+  );
+
+  // Refs for each of the items
+  const itemRefs = useRef(
+    new Array(itineraryData.length).fill().map(() => React.createRef())
+  );
+
+  // Effect to attach the IntersectionObserver to each ref
+  React.useEffect(() => {
+    const observerCallback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Use the entry's target to find the index and update visibility state
+          const index = itemRefs.current.indexOf(entry.target);
+          setVisibility((prevVisibility) => ({
+            ...prevVisibility,
+            [index]: true, // Set visible
+          }));
+        }
+      });
+    };
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.1,
+    };
+
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions
+    );
+
+    itemRefs.current.forEach((ref) => {
+      if (ref.current) {
+        observer.observe(ref.current);
+      }
+    });
+
+    // Cleanup observer on unmount
+    return () => {
+      if (itemRefs.current) {
+        itemRefs.current.forEach((ref) => {
+          if (ref.current) {
+            observer.unobserve(ref.current);
+          }
+        });
+      }
+    };
+  }, [itineraryData]);
 
   return (
     <Card
@@ -77,7 +144,7 @@ export default function ItineraryCard({ id, itineraryData, onDelete }) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={"Travel Card " + id}
+        title={"Travel Card "}
         subheader={dateString}
       />
       <CardMedia
@@ -96,33 +163,91 @@ export default function ItineraryCard({ id, itineraryData, onDelete }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            overflowY: "scroll", // This makes the whole modal area potentially scrollable, depending on the modal implementation
           }}
         >
           <div
-            className="modalContainer modalBackground"
             style={{
               backgroundColor: preferredMode == "dark" ? "#1A2027" : "#fff",
+              borderRadius: "12px",
+              overflowY: "auto", // Enables scrolling for overflow content
+              maxHeight: "80vh", // Sets a maximum height for the modal content (80% of the viewport height)
+              width: "1200px", // Or a specific width if needed
+              margin: "20px", // Adds some space around the modal to ensure it doesn't touch the edges of the viewport
             }}
           >
             {/* Modal content */}
-            {/* {itineraryData.map((dayInfo, index) => (
-              <Card key={index} sx={{ margin: 2, padding: 2 }}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    {dayInfo.day}
-                  </Typography>
-                  {dayInfo.activities.map((activity, activityIndex) => (
-                    <Typography
-                      key={activityIndex}
-                      variant="body1"
-                      sx={{ marginBottom: 1 }}
-                    >
-                      {activityIndex + 1}. {activity}
-                    </Typography>
-                  ))}
-                </CardContent>
-              </Card>
-            ))} */}
+            {/* <FadeInCard> */}
+            {itineraryData.map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  sx={{ margin: 2, padding: 2 }}
+                  ref={itemRefs.current[index]}
+                  // className={`fade-in ${visibility[index] ? 'visible' : ''}`}
+                >
+                  <CardContent style={{ alignContent: "center" }}>
+                    {/* Display the title if it exists */}
+                    {item.title && (
+                      <Typography
+                        variant="h3"
+                        gutterBottom
+                        style={{
+                          fontFamily: "Comic Sans MS",
+                          marginLeft: "10%",
+                          marginRight: "10%",
+                          marginTop: 20,
+                          textAlign: 'center'
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                    )}
+
+                    {/* Display the day and its activities if they exist */}
+                    {item.day && (
+                      <>
+                        <div style={{marginLeft: '10%'}}>
+                          <Typography
+                            variant="h5"
+                            gutterBottom
+                            style={{ color: pink[500],fontFamily: "Comic Sans MS", }}
+                          >
+                            {item.day}
+                          </Typography>
+                          {item.activities.map((activity, activityIndex) => (
+                            <Typography
+                              key={activityIndex}
+                              variant="body1"
+                              sx={{ marginBottom: 1 }}
+                              style={{fontFamily: 'Montserrat', fontSize: "18px"}}
+                            >
+                              -- {activity}
+                            </Typography>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Display the ending note if it exists */}
+                    {item.ending && (
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontFamily: "Comic Sans MS",
+                          marginLeft: '10%',
+                          marginRight: '10%',
+                          color: teal[700],
+                        }}
+                      >
+                        {item.ending}
+                      </Typography>
+                    )}
+                  </CardContent>
+                </div>
+              );
+            })}
+            {/* </FadeInCard> */}
           </div>
         </Modal>
       </Collapse>
