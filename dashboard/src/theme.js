@@ -20,7 +20,7 @@ export const themeSettings = (mode) => {
               light: "#333333",
             },
             background:{
-              default: grey[900]
+              default: blueGrey[900]
             }
           }
         : {

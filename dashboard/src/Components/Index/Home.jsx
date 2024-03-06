@@ -14,7 +14,6 @@ import Canvas from "./Canvas";
 import { useSelector } from "react-redux";
 import FeatureStacks from "../Display/FeatureStack";
 // need to use mui grid v2 for contents view
-import styled from "styled-components";
 
 export default function Home(prefer) {
   const currentUser = useAuth();

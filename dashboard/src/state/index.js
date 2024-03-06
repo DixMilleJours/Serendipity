@@ -8,7 +8,7 @@ const initialState = {
   destination: "",
   travels: ["", "", 0, 0, "", ""],
   hotels: [0, 0, 0],
-  travelCards: [[]]
+  travelCards: []
 };
 
 export const authSlice = createSlice({
@@ -44,11 +44,11 @@ export const authSlice = createSlice({
       state.hotels[2] = isNaN(action.payload.children) ? 0 : action.payload.children;
     },
     setTravelCard: (state, action) => {
-      state.travelCards.push(action.payload);
+      state.travelCards.push(action.payload.store);
     },
     removeTravelCard: (state, action) => {
-      const index = action.payload;
-      state.travelCards.splice(index, 1);
+      const indexToDelete = action.payload;
+      state.travelCards = state.travelCards.filter((_, index) => index !== indexToDelete);
     },
   },
 });

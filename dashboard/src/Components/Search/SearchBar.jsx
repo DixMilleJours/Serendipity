@@ -6,7 +6,6 @@ import Departure from "./Others/Departure";
 import Destination from "./Others/Destination";
 import CustomizedSlider from "./Others/Budget";
 import BasicRating from "./Others/Hotel";
-import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Unstable_Grid2";
 import { styled } from "@mui/material/styles";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -17,30 +16,25 @@ import TravelDetails from "./Others/TravelDetails";
 import HotelDetails from "./Others/HotelDetails";
 import TravelInfo from "./Others/TravelInfo";
 import HotelInfo from "./Others/HotelInfo";
-import { useAuth } from "../../AuthContext";
 import SendIcon from "@mui/icons-material/Send";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import dayjs from "dayjs";
-import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { setLocation } from "../../state";
+import { setLocation, setTravelCard } from "../../state";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-
 import MenuItem from "@mui/material/MenuItem";
-import ReactMarkdown from "react-markdown";
 
-import Itinerary from "../Display/ItineraryCard";
+import ItineraryCard from "../Display/ItineraryCard";
 
 import {
   httpsCallable,
   getFunctions,
   connectFunctionsEmulator,
 } from "firebase/functions";
-import { getApp } from "firebase/app";
 
 // the user will be allowed to proceed to use search bar only when they are logged in
 const Item = styled(Paper)(({ theme }) => ({
@@ -48,6 +42,7 @@ const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(1),
   textAlign: "center",
+  justifyContent: "center",
   color: theme.palette.text.secondary,
 }));
 
@@ -58,7 +53,11 @@ function checkEmptyOrNull(data) {
     }
 
     // If the property is an object, recursively check its properties
-    if (typeof data[key] === 'object' && !Array.isArray(data[key]) && data[key] !== null) {
+    if (
+      typeof data[key] === "object" &&
+      !Array.isArray(data[key]) &&
+      data[key] !== null
+    ) {
       if (checkEmptyOrNull(data[key])) {
         return true; // Returns true if any nested property is an empty string or null
       }
@@ -82,12 +81,11 @@ function SearchBar({ loggedin, setError, setSelected }) {
   const [isTravelModalOpen, setTravelModalOpen] = React.useState(false);
   const [isHotelDetails, setHotelDetails] = React.useState(false);
   const [iconColor, setIconColor] = React.useState(blueGrey[500]);
-  const [itineraryData, setItineraryData] = React.useState();
+  const [itineraryData, setItineraryData] = React.useState([]);
 
   const dispatch = useDispatch();
   const defaultDestination = useSelector((state) => state.destination);
   const defaultDeparture = useSelector((state) => state.departure);
-  const travelCards = useSelector((state) => state.travelCards);
 
   const travels = useSelector((state) => state.travels); // array
   const hotels = useSelector((state) => state.hotels); // array
@@ -95,6 +93,34 @@ function SearchBar({ loggedin, setError, setSelected }) {
   // Preference
   const [food, setFood] = React.useState("");
   const [POI, setPOI] = React.useState("");
+
+  const [isScreen, setScreen] = React.useState(window.innerWidth < 1000);
+
+  const groupItineraryData = (data, itemsPerRow) => {
+    return data.reduce((rows, item, idx) => {
+      const rowIdx = Math.floor(idx / itemsPerRow);
+      if (!rows[rowIdx]) {
+        rows[rowIdx] = []; // Start a new row
+      }
+      rows[rowIdx].push(item);
+      return rows;
+    }, []);
+  };
+
+  const rows = groupItineraryData(itineraryData, 3);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      // Update the state based on the new window width
+      setScreen(window.innerWidth < 1000);
+    };
+
+    // Set up the event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener when the component unmounts
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   function setEditorColor() {
     setIconColor(blueGrey[900]);
@@ -108,97 +134,14 @@ function SearchBar({ loggedin, setError, setSelected }) {
     setPOI(event.target.value);
   };
 
-  // const deleteItinerary = (indexToDelete) => {
-  //   // Filter out the itinerary at the given index
-  //   const newItineraries = itineraries.filter(
-  //     (_, index) => index !== indexToDelete
-  //   );
-  //   console.log("delete");
-  //   // Update the state with the new array
-  //   setItineraries(newItineraries);
-  // };
-
-  const splitContent = (content) => {
-    // Regular expression to match the day numbers (assuming they are in the format "Day X")
-    const dayRegex = /Day\s*\d+\s*[0-9a-zA-Z+-/*=%&|!@#$^()]*\s*:?\s*/g;
-    //  console.log(content)
-    return content.split(dayRegex);
+  const deleteItinerary = (indexToDelete) => {
+    setItineraryData((currentItineraries) =>
+      currentItineraries.filter((_, index) => index !== indexToDelete)
+    );
   };
-
-  async function generateTrip(e) {
-    e.preventDefault();
-    // dictionary value
-    const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-    const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-
-    if (dayjs(startDate).isBefore(endDate)) {
-      const tripValue = {
-        departure,
-        destination,
-        startDate,
-        endDate,
-        rate,
-        price,
-        travels,
-        hotels,
-      };
-      console.log(tripValue);
-      try {
-        // Send date to backend
-      } catch (error) {}
-    } else {
-      alert("date format error");
-      window.location.href = "/home";
-    }
-  }
 
   // Testing connection to back-end
   const [storage, setStorage] = React.useState();
-  let navigate = useNavigate();
-
-  // const handleClick = async () => {
-  //   // reset storage
-  //   setStorage();
-  //   setStorage();
-
-  //   const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-  //   const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-  //   // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-  //   try {
-  //     // reset storage
-  //     setStorage();
-
-  //     // const startDate = dayjs(oStartDate).format("YYYY-MM-DD");
-  //     // const endDate = dayjs(oEndDate).format("YYYY-MM-DD");
-  //     // https://us-central1-serendipity-e1c63.cloudfunctions.net/searchFlight
-
-  //     // ！！！ local testing for now.
-  //     // const response = await axios.get(
-  //     //   "http://127.0.0.1:5001/serendipity-e1c63/us-central1/searchFlightV2"
-  //     // );
-  //     // setStorage(response.data.data);
-  //     // Call getOptimalFlight cloud function with the flight data
-  //     const functions = getFunctions();
-  //     // !!! switch to use deployed function later
-  //     const functionss = getFunctions(getApp());
-  //     connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
-
-  //     const getFinalResult = httpsCallable(functionss, "generator");
-  //     // !!! harcode budget for now.
-  //     const finalResult = await getFinalResult({
-  //       // flightData: response.data,
-  //       // budget: "1000",
-  //     });
-
-  //     // Read result of the Cloud Function.
-  //     const optimalResult = finalResult.data.gptResponse.content;
-  //     console.log(optimalResult);
-  //     setStorage(optimalResult);
-  //   } catch (error) {
-  //     console.error(error);
-  //     console.error(error);
-  //   }
-  // };
 
   const flightData = {
     departure: travels[4],
@@ -223,12 +166,11 @@ function SearchBar({ loggedin, setError, setSelected }) {
   };
 
   const handleClickV2 = async () => {
-    // console.log({
-    //   flightData,
-    //   hotelData,
-    //   userPreference,
-    // });
-    if(checkEmptyOrNull(flightData) || checkEmptyOrNull(hotelData) || checkEmptyOrNull(userPreference)){
+    if (
+      checkEmptyOrNull(flightData) ||
+      checkEmptyOrNull(hotelData) ||
+      checkEmptyOrNull(userPreference)
+    ) {
       setError({
         open: true,
         content: "Fields should not be empty",
@@ -236,7 +178,6 @@ function SearchBar({ loggedin, setError, setSelected }) {
       return;
     }
     try {
-      setStorage("");
       setProgress(true);
       const functionss = getFunctions();
       connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
@@ -249,21 +190,32 @@ function SearchBar({ loggedin, setError, setSelected }) {
       // Read result of the Cloud Function.
       const result = finalResult.data.finalResult;
       // Remove the ```json and ``` from the string
-      const jsonResult = result.replace(/^```json\s*|^```\s*|\s*```$/g, '');
+      const jsonResult = result.replace(/^```json\s*|^```\s*|\s*```$/g, "");
       console.log(jsonResult);
       setProgress(false);
-      setStorage(jsonResult);
-
+      const data = JSON.parse(jsonResult);
+      setStorage(data);
       // Use the parsed array in your state
-      setItineraryData(JSON.parse(jsonResult));
+      const newItinerary = {
+        // ... your itinerary data here
+        data,
+      };
 
+      // Add the new itinerary to the array of itineraries
+      setItineraryData([...itineraryData, data]);
+
+      // setItineraryData(data);
+      dispatch(
+        setTravelCard({
+          store: data,
+        })
+      );
     } catch (error) {
       setProgress(false);
       setError({
         open: true,
         content: `${error.message}`,
       });
-
     }
   };
 
@@ -320,310 +272,662 @@ function SearchBar({ loggedin, setError, setSelected }) {
               <div className="formBox">
                 <form>
                   {/* <Box sx={{ flexGrow: 1 }}> */}
-                  <Grid container spacing={2.5}>
-                    <Grid xs={6} flexDirection="row">
-                      <Item
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          marginRight: "2px",
-                        }}
-                      >
-                        <Departure
-                          placeholder={"Departure"}
-                          setDeparture={setDeparture}
-                          defaultValue={defaultDeparture}
-                        />
-                        <Destination
-                          placeholder={"Destination"}
-                          setDestination={setDestination}
-                          marginLeft={"5px"}
-                          defaultValue={defaultDestination}
-                        />
-                      </Item>
-                    </Grid>
-                    <Grid xs={3}>
-                      <Item>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label="Start date"
-                            value={oStartDate}
-                            onChange={(newValue) => setStartDate(newValue)}
+                  {!isScreen && (
+                    <Grid
+                      container
+                      spacing={2.5}
+                      direction="row"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Grid xs={6} flexDirection="row">
+                        <Item
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            marginRight: "2px",
+                          }}
+                        >
+                          <Departure
+                            placeholder={"Departure"}
+                            setDeparture={setDeparture}
+                            defaultValue={defaultDeparture}
                           />
-                        </LocalizationProvider>
-                      </Item>
-                    </Grid>
-                    <Grid xs={3}>
-                      <Item>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label="End date"
-                            value={oEndDate}
-                            onChange={(newValue) => setEndDate(newValue)}
+                          <Destination
+                            placeholder={"Destination"}
+                            setDestination={setDestination}
+                            marginLeft={"5px"}
+                            defaultValue={defaultDestination}
                           />
-                        </LocalizationProvider>
-                      </Item>
-                    </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <CustomizedSlider setPrice={setPrice} price={price} />
-                        {/* ===== Travel Details Button ===== */}
-                        {!isTravelDetails && (
-                          <Button
-                            sx={{
-                              width: "150px",
-                              textAlign: "center",
-                              alignContent: "center",
-                              marginLeft: "65px",
-                            }}
-                            variant="contained"
-                            onClick={() => {
-                              if (
-                                departure === null ||
-                                destination === null
-                              ) {
-                                setError({
-                                  open: true,
-                                  content:
-                                    "departure or destination should not be empty",
-                                });
-                              } else {
-                                setTravelModalOpen(true);
-                                setTravelDetails(false);
-                                dispatch(
-                                  setLocation({
-                                    departure: departure,
-                                    destination: destination,
-                                  })
-                                );
-                              }
-                            }}
-                          >
-                            Travel Details
-                          </Button>
-                        )}
-                        {/* ===== Parse Contents, Editor Button ===== */}
-                        {isTravelDetails && (
-                          <React.Fragment>
-                            <Box
+                        </Item>
+                      </Grid>
+                      <Grid xs={3}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              label="Start date"
+                              value={oStartDate}
+                              onChange={(newValue) => setStartDate(newValue)}
+                            />
+                          </LocalizationProvider>
+                        </Item>
+                      </Grid>
+                      <Grid xs={3}>
+                        <Item>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              label="End date"
+                              value={oEndDate}
+                              onChange={(newValue) => setEndDate(newValue)}
+                            />
+                          </LocalizationProvider>
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <CustomizedSlider setPrice={setPrice} price={price} />
+                          {/* ===== Travel Details Button ===== */}
+                          {!isTravelDetails && (
+                            <Button
                               sx={{
-                                marginTop: "25px",
-                                marginLeft: "20px",
+                                width: "150px",
                                 textAlign: "center",
-                                alignItems: "center",
-                                pl: 2,
+                                alignContent: "center",
+                                marginLeft: "65px",
+                              }}
+                              variant="contained"
+                              onClick={() => {
+                                if (
+                                  departure === null ||
+                                  destination === null
+                                ) {
+                                  setError({
+                                    open: true,
+                                    content:
+                                      "departure or destination should not be empty",
+                                  });
+                                } else {
+                                  setTravelModalOpen(true);
+                                  setTravelDetails(false);
+                                  dispatch(
+                                    setLocation({
+                                      departure: departure,
+                                      destination: destination,
+                                    })
+                                  );
+                                }
                               }}
                             >
-                              <TravelInfo
-                                setTravelModalOpen={setTravelModalOpen}
-                              />
-                            </Box>
-                            <Box sx={{ marginTop: "50px" }}>
-                              <EditNoteIcon
-                                style={{ cursor: "pointer", color: iconColor }}
-                                onClick={() => {
-                                  if (
-                                    departure === null ||
-                                    destination === null
-                                  ) {
-                                    setError({
-                                      open: true,
-                                      content:
-                                        "departure or destination should not be empty",
-                                    });
-                                  } else {
-                                    setTravelModalOpen(true);
-                                    setTravelDetails(false);
-                                    dispatch(
-                                      setLocation({
-                                        departure: departure,
-                                        destination: destination,
-                                      })
-                                    );
-                                  }
+                              Travel Details
+                            </Button>
+                          )}
+                          {/* ===== Parse Contents, Editor Button ===== */}
+                          {isTravelDetails && (
+                            <React.Fragment>
+                              <Box
+                                sx={{
+                                  marginTop: "25px",
+                                  marginLeft: "20px",
+                                  textAlign: "center",
+                                  alignItems: "center",
+                                  pl: 2,
                                 }}
-                              />
-                            </Box>
-                          </React.Fragment>
-                        )}
-                      </Item>
-                    </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <BasicRating setRating={setRating} rate={rate} />
-                        {!isHotelDetails && (
-                          <Button
-                            sx={{
-                              marginLeft: "50px",
-                              width: "150px",
-                              textAlign: "center",
-                              alignContent: "center",
-                            }}
-                            variant="contained"
-                            onClick={() => {
-                              if (departure === null || destination === null) {
-                                setError({
-                                  open: true,
-                                  content:
-                                    "departure or destination should not be empty",
-                                });
-                              } else {
-                                setModalOpen(true);
-                                setHotelDetails(false);
-                                dispatch(
-                                  setLocation({
-                                    departure: departure,
-                                    destination: destination,
-                                  })
-                                );
-                              }
-                            }}
-                          >
-                            Hotel Details
-                          </Button>
-                        )}
-
-                        {isHotelDetails && (
-                          <React.Fragment>
-                            <Box
+                              >
+                                <TravelInfo
+                                  setTravelModalOpen={setTravelModalOpen}
+                                />
+                              </Box>
+                              <Box sx={{ marginTop: "50px" }}>
+                                <EditNoteIcon
+                                  style={{
+                                    cursor: "pointer",
+                                    color: iconColor,
+                                  }}
+                                  onClick={() => {
+                                    if (
+                                      departure === null ||
+                                      destination === null
+                                    ) {
+                                      setError({
+                                        open: true,
+                                        content:
+                                          "departure or destination should not be empty",
+                                      });
+                                    } else {
+                                      setTravelModalOpen(true);
+                                      setTravelDetails(false);
+                                      dispatch(
+                                        setLocation({
+                                          departure: departure,
+                                          destination: destination,
+                                        })
+                                      );
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </React.Fragment>
+                          )}
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <BasicRating setRating={setRating} rate={rate} />
+                          {!isHotelDetails && (
+                            <Button
                               sx={{
-                                marginLeft: "0px",
-                                marginTop: "25px",
+                                marginLeft: "50px",
+                                width: "150px",
                                 textAlign: "center",
-                                alignItems: "center",
-                                pl: 2,
+                                alignContent: "center",
+                              }}
+                              variant="contained"
+                              onClick={() => {
+                                if (
+                                  departure === null ||
+                                  destination === null
+                                ) {
+                                  setError({
+                                    open: true,
+                                    content:
+                                      "departure or destination should not be empty",
+                                  });
+                                } else {
+                                  setModalOpen(true);
+                                  setHotelDetails(false);
+                                  dispatch(
+                                    setLocation({
+                                      departure: departure,
+                                      destination: destination,
+                                    })
+                                  );
+                                }
                               }}
                             >
-                              <HotelInfo />
-                            </Box>
-                            <Box sx={{ marginTop: "50px" }}>
-                              <EditNoteIcon
-                                style={{ cursor: "pointer", color: iconColor }}
-                                onMouseHover={setEditorColor}
-                                onClick={() => {
-                                  if (
-                                    departure === null ||
-                                    destination === null
-                                  ) {
-                                    setError({
-                                      open: true,
-                                      content:
-                                        "departure or destination should not be empty",
-                                    });
-                                  } else {
-                                    setModalOpen(true);
-                                    setHotelDetails(false);
-                                    dispatch(
-                                      setLocation({
-                                        departure: departure,
-                                        destination: destination,
-                                      })
-                                    );
-                                  }
-                                }}
-                              />
-                            </Box>
-                          </React.Fragment>
-                        )}
-                      </Item>
-                    </Grid>
-                    {/* Temporary Addition */}
+                              Hotel Details
+                            </Button>
+                          )}
 
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <Box sx={{ minWidth: 210 }}>
-                          <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">
-                              Dining Preference
-                            </InputLabel>
-                            <Select
-                              labelId="demo-simple-select-label"
-                              id="demo-simple-select"
-                              value={food}
-                              label="Dining Preference"
-                              onChange={handleChangeDiningPreference}
-                            >
-                              <MenuItem value={"Chinese"}>
-                                🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese
-                              </MenuItem>
-                              <MenuItem value={"Korean"}>
-                                🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean
-                              </MenuItem>
-                              <MenuItem value={"French"}>
-                                🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French
-                              </MenuItem>
-                              <MenuItem value={"Indian"}>
-                                🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian
-                              </MenuItem>
-                              <MenuItem value={"Japanese"}>
-                                🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese
-                              </MenuItem>
-                              <MenuItem value={"Mexican"}>
-                                🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican
-                              </MenuItem>
-                              <MenuItem value={"Thai"}>
-                                🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai
-                              </MenuItem>
-                              <MenuItem value={"American"}>
-                                🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American
-                              </MenuItem>
-                              <MenuItem value={"Greek"}>
-                                🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek
-                              </MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </Item>
+                          {isHotelDetails && (
+                            <React.Fragment>
+                              <Box
+                                sx={{
+                                  marginLeft: "0px",
+                                  marginTop: "25px",
+                                  textAlign: "center",
+                                  alignItems: "center",
+                                  pl: 2,
+                                }}
+                              >
+                                <HotelInfo />
+                              </Box>
+                              <Box sx={{ marginTop: "50px" }}>
+                                <EditNoteIcon
+                                  style={{
+                                    cursor: "pointer",
+                                    color: iconColor,
+                                  }}
+                                  onMouseHover={setEditorColor}
+                                  onClick={() => {
+                                    if (
+                                      departure === null ||
+                                      destination === null
+                                    ) {
+                                      setError({
+                                        open: true,
+                                        content:
+                                          "departure or destination should not be empty",
+                                      });
+                                    } else {
+                                      setModalOpen(true);
+                                      setHotelDetails(false);
+                                      dispatch(
+                                        setLocation({
+                                          departure: departure,
+                                          destination: destination,
+                                        })
+                                      );
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </React.Fragment>
+                          )}
+                        </Item>
+                      </Grid>
+                      {/* Temporary Addition */}
+
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <Box sx={{ minWidth: 210 }}>
+                            <FormControl fullWidth>
+                              <InputLabel id="demo-simple-select-label">
+                                Dining Preference
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={food}
+                                label="Dining Preference"
+                                onChange={handleChangeDiningPreference}
+                              >
+                                <MenuItem value={"Chinese"}>
+                                  🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese
+                                </MenuItem>
+                                <MenuItem value={"Korean"}>
+                                  🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean
+                                </MenuItem>
+                                <MenuItem value={"French"}>
+                                  🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French
+                                </MenuItem>
+                                <MenuItem value={"Indian"}>
+                                  🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian
+                                </MenuItem>
+                                <MenuItem value={"Japanese"}>
+                                  🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese
+                                </MenuItem>
+                                <MenuItem value={"Mexican"}>
+                                  🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican
+                                </MenuItem>
+                                <MenuItem value={"Thai"}>
+                                  🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai
+                                </MenuItem>
+                                <MenuItem value={"American"}>
+                                  🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American
+                                </MenuItem>
+                                <MenuItem value={"Greek"}>
+                                  🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <Box sx={{ minWidth: 210 }}>
+                            <FormControl fullWidth>
+                              <InputLabel id="demo-simple-select-label">
+                                Trip Preference
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={POI}
+                                label="Trip Preference"
+                                onChange={handleChangePOI}
+                              >
+                                <MenuItem value={"park"}>
+                                  🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park
+                                </MenuItem>
+                                <MenuItem value={"art_gallery"}>
+                                  🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art
+                                  Gallery
+                                </MenuItem>
+                                <MenuItem value={"campground"}>
+                                  ⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground
+                                </MenuItem>
+                                <MenuItem value={"church"}>
+                                  ⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church
+                                </MenuItem>
+                                <MenuItem value={"zoo"}>
+                                  🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo
+                                </MenuItem>
+                                <MenuItem value={"university"}>
+                                  🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University
+                                </MenuItem>
+                                <MenuItem value={"shopping_mall"}>
+                                  🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping
+                                  Mall
+                                </MenuItem>
+                                <MenuItem value={"museum"}>
+                                  🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum
+                                </MenuItem>
+                                <MenuItem value={"bar"}>
+                                  🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        </Item>
+                      </Grid>
                     </Grid>
-                    <Grid xs={6}>
-                      <Item style={{ display: "flex", flexDirection: "row" }}>
-                        <Box sx={{ minWidth: 210 }}>
-                          <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">
-                              Trip Preference
-                            </InputLabel>
-                            <Select
-                              labelId="demo-simple-select-label"
-                              id="demo-simple-select"
-                              value={POI}
-                              label="Trip Preference"
-                              onChange={handleChangePOI}
+                  )}
+                  {isScreen && (
+                    <Grid
+                      container
+                      spacing={2}
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Grid xs={6} flexDirection="row">
+                        <Item
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <Departure
+                            placeholder={"Departure"}
+                            setDeparture={setDeparture}
+                            defaultValue={defaultDeparture}
+                          />
+                        </Item>
+                      </Grid>
+                      <Grid xs={6} flexDirection="row">
+                        <Item
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <Destination
+                            placeholder={"Destination"}
+                            setDestination={setDestination}
+                            defaultValue={defaultDestination}
+                          />
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              sx={{
+                                width: "270px",
+                              }}
+                              label="Start date"
+                              value={oStartDate}
+                              onChange={(newValue) => setStartDate(newValue)}
+                            />
+                          </LocalizationProvider>
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              sx={{
+                                width: "270px",
+                              }}
+                              label="End date"
+                              value={oEndDate}
+                              onChange={(newValue) => setEndDate(newValue)}
+                            />
+                          </LocalizationProvider>
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <CustomizedSlider setPrice={setPrice} price={price} />
+                          {/* ===== Travel Details Button ===== */}
+                          {!isTravelDetails && (
+                            <Button
+                              sx={{
+                                width: "150px",
+                                textAlign: "center",
+                                alignContent: "center",
+                                marginLeft: "65px",
+                              }}
+                              variant="contained"
+                              onClick={() => {
+                                if (
+                                  departure === null ||
+                                  destination === null
+                                ) {
+                                  setError({
+                                    open: true,
+                                    content:
+                                      "departure or destination should not be empty",
+                                  });
+                                } else {
+                                  setTravelModalOpen(true);
+                                  setTravelDetails(false);
+                                  dispatch(
+                                    setLocation({
+                                      departure: departure,
+                                      destination: destination,
+                                    })
+                                  );
+                                }
+                              }}
                             >
-                              <MenuItem value={"park"}>
-                                🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park
-                              </MenuItem>
-                              <MenuItem value={"art_gallery"}>
-                                🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art
-                                Gallery
-                              </MenuItem>
-                              <MenuItem value={"campground"}>
-                                ⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground
-                              </MenuItem>
-                              <MenuItem value={"church"}>
-                                ⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church
-                              </MenuItem>
-                              <MenuItem value={"zoo"}>
-                                🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo
-                              </MenuItem>
-                              <MenuItem value={"university"}>
-                                🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University
-                              </MenuItem>
-                              <MenuItem value={"shopping_mall"}>
-                                🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping
-                                Mall
-                              </MenuItem>
-                              <MenuItem value={"museum"}>
-                                🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum
-                              </MenuItem>
-                              <MenuItem value={"bar"}>
-                                🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar
-                              </MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </Item>
+                              Travel Details
+                            </Button>
+                          )}
+                          {/* ===== Parse Contents, Editor Button ===== */}
+                          {isTravelDetails && (
+                            <React.Fragment>
+                              <Box
+                                sx={{
+                                  marginTop: "25px",
+                                  marginLeft: "20px",
+                                  textAlign: "center",
+                                  alignItems: "center",
+                                  pl: 2,
+                                }}
+                              >
+                                <TravelInfo
+                                  setTravelModalOpen={setTravelModalOpen}
+                                />
+                              </Box>
+                              <Box sx={{ marginTop: "50px" }}>
+                                <EditNoteIcon
+                                  style={{
+                                    cursor: "pointer",
+                                    color: iconColor,
+                                  }}
+                                  onClick={() => {
+                                    if (
+                                      departure === null ||
+                                      destination === null
+                                    ) {
+                                      setError({
+                                        open: true,
+                                        content:
+                                          "departure or destination should not be empty",
+                                      });
+                                    } else {
+                                      setTravelModalOpen(true);
+                                      setTravelDetails(false);
+                                      dispatch(
+                                        setLocation({
+                                          departure: departure,
+                                          destination: destination,
+                                        })
+                                      );
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </React.Fragment>
+                          )}
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <BasicRating setRating={setRating} rate={rate} />
+                          {!isHotelDetails && (
+                            <Button
+                              sx={{
+                                marginLeft: "25px",
+                                width: "150px",
+                                textAlign: "center",
+                                alignContent: "center",
+                              }}
+                              variant="contained"
+                              onClick={() => {
+                                if (
+                                  departure === null ||
+                                  destination === null
+                                ) {
+                                  setError({
+                                    open: true,
+                                    content:
+                                      "departure or destination should not be empty",
+                                  });
+                                } else {
+                                  setModalOpen(true);
+                                  setHotelDetails(false);
+                                  dispatch(
+                                    setLocation({
+                                      departure: departure,
+                                      destination: destination,
+                                    })
+                                  );
+                                }
+                              }}
+                            >
+                              Hotel Details
+                            </Button>
+                          )}
+
+                          {isHotelDetails && (
+                            <React.Fragment>
+                              <Box
+                                sx={{
+                                  marginLeft: "0px",
+                                  marginTop: "25px",
+                                  textAlign: "center",
+                                  alignItems: "center",
+                                  pl: 2,
+                                }}
+                              >
+                                <HotelInfo />
+                              </Box>
+                              <Box sx={{ marginTop: "50px" }}>
+                                <EditNoteIcon
+                                  style={{
+                                    cursor: "pointer",
+                                    color: iconColor,
+                                  }}
+                                  onMouseHover={setEditorColor}
+                                  onClick={() => {
+                                    if (
+                                      departure === null ||
+                                      destination === null
+                                    ) {
+                                      setError({
+                                        open: true,
+                                        content:
+                                          "departure or destination should not be empty",
+                                      });
+                                    } else {
+                                      setModalOpen(true);
+                                      setHotelDetails(false);
+                                      dispatch(
+                                        setLocation({
+                                          departure: departure,
+                                          destination: destination,
+                                        })
+                                      );
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </React.Fragment>
+                          )}
+                        </Item>
+                      </Grid>
+                      {/* Temporary Addition */}
+
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <Box sx={{ minWidth: 270 }}>
+                            <FormControl fullWidth>
+                              <InputLabel id="demo-simple-select-label">
+                                Dining Preference
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={food}
+                                label="Dining Preference"
+                                onChange={handleChangeDiningPreference}
+                              >
+                                <MenuItem value={"Chinese"}>
+                                  🥡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chinese
+                                </MenuItem>
+                                <MenuItem value={"Korean"}>
+                                  🍜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Korean
+                                </MenuItem>
+                                <MenuItem value={"French"}>
+                                  🥖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;French
+                                </MenuItem>
+                                <MenuItem value={"Indian"}>
+                                  🍛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian
+                                </MenuItem>
+                                <MenuItem value={"Japanese"}>
+                                  🍣&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Japanese
+                                </MenuItem>
+                                <MenuItem value={"Mexican"}>
+                                  🌮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mexican
+                                </MenuItem>
+                                <MenuItem value={"Thai"}>
+                                  🥘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thai
+                                </MenuItem>
+                                <MenuItem value={"American"}>
+                                  🍔&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American
+                                </MenuItem>
+                                <MenuItem value={"Greek"}>
+                                  🥙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Greek
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        </Item>
+                      </Grid>
+                      <Grid xs={6}>
+                        <Item style={{ display: "flex", flexDirection: "row" }}>
+                          <Box sx={{ minWidth: 270 }}>
+                            <FormControl fullWidth>
+                              <InputLabel id="demo-simple-select-label">
+                                Trip Preference
+                              </InputLabel>
+                              <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={POI}
+                                label="Trip Preference"
+                                onChange={handleChangePOI}
+                              >
+                                <MenuItem value={"park"}>
+                                  🎡&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Park
+                                </MenuItem>
+                                <MenuItem value={"art_gallery"}>
+                                  🎨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Art
+                                  Gallery
+                                </MenuItem>
+                                <MenuItem value={"campground"}>
+                                  ⛺️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Campground
+                                </MenuItem>
+                                <MenuItem value={"church"}>
+                                  ⛪️&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Church
+                                </MenuItem>
+                                <MenuItem value={"zoo"}>
+                                  🐘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoo
+                                </MenuItem>
+                                <MenuItem value={"university"}>
+                                  🎓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;University
+                                </MenuItem>
+                                <MenuItem value={"shopping_mall"}>
+                                  🛍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shopping
+                                  Mall
+                                </MenuItem>
+                                <MenuItem value={"museum"}>
+                                  🏛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Museum
+                                </MenuItem>
+                                <MenuItem value={"bar"}>
+                                  🍺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bar
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        </Item>
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  )}
+
                   {/* </Box> */}
                   {isProgress && (
                     <Box sx={{ marginTop: "50px" }}>
@@ -648,31 +952,41 @@ function SearchBar({ loggedin, setError, setSelected }) {
 
                   {/* =============================== PARSING RESULTS ========================= */}
                   <div style={{ height: 40 }}></div>
-                  {/* Render each itinerary */}
-                  {/* <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  > */}
-                  {/* {itineraries.map((index, itinerary) => (
-                    <div style={{ marginLeft: "20px" }}>
-                      <Itinerary
-                        key={index}
-                        itineraryData={itineraries}
-                        onDelete={() => deleteItinerary(index)}
-                      />
-                    </div>
-                  ))} */}
-                  {
-                    storage && (
-                      <Itinerary
-                        itineraryData={itineraryData}
-                        // onDelete={() => deleteItinerary(index)}
-                      />
-                    )
-                  }
+                  {/* <div style={{ display: "flex", overflowX: "auto" }}> */}
+                  {storage &&
+                    rows.map((row, rowIndex) => (
+                      <div
+                        key={rowIndex}
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          marginBottom: "20px",
+                        }}
+                      >
+                        {row.map((item, itemIndex) => (
+                          <div
+                            key={itemIndex}
+                            style={{
+                              marginLeft: itemIndex > 0 ? "20px" : "0px",
+                            }}
+                          >
+                            <ItineraryCard
+                              index={itemIndex}
+                              itineraryData={item}
+                              onDelete={() => deleteItinerary(itemIndex)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  {/* </div> */}
+
+                  {/* {travelCards && travelCards.length > 0 && (
+                    <ItineraryCard
+                      itineraryData={travelCards[0]}
+                      // onDelete={() => deleteItinerary(index)}
+                    />
+                  )} */}
                   {/* </div> */}
                 </form>
               </div>

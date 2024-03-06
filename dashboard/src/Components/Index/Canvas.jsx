@@ -16,7 +16,7 @@ function Canvas({ children }) {
           preferredMode === "dark"
             // ? "linear-gradient(180deg,rgba(0,0,0,255) 0,rgba(0,0,0,0) 100%),linear-gradient(90deg,rgba(80,227,194,0.2) 0,rgba(0,112,243,0.2) 100%)"
             // : "linear-gradient(181deg,rgba(255,255,255,255) 0,rgba(255,255,255,0) 100%),linear-gradient(90deg,rgba(80,227,194,0.08) 0,rgba(0,112,243,0.08) 100%)",
-            ? "linear-gradient(180deg, rgba(0,0,0,255) 0%, rgba(0,0,0,0) 100%), linear-gradient(90deg, rgba(255,105,180,0.2) 0%, rgba(255,182,193,0.2) 100%)"
+            ? "linear-gradient(180deg, rgba(0,0,0,255) 0%, rgba(0,0,0,0) 100%), linear-gradient(90deg, #37474f 0%, #37474f 100%)"
             : "linear-gradient(181deg, rgba(255,255,255,255) 0%, rgba(255,255,255,0) 100%), linear-gradient(90deg, rgba(255,105,180,0.08) 0%, rgba(255,182,193,0.08) 100%)"
           }}
     >

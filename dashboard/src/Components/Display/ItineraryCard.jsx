@@ -10,17 +10,38 @@ import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import { useSelector, useDispatch } from "react-redux";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Modal from "@mui/material/Modal";
-import NewYork from "../../static/images/newyork.webp";
+import B1 from "../../static/images/bg1.jpg";
+import B2 from "../../static/images/bg2.jpg";
+import B3 from "../../static/images/bg3.jpg";
+import B4 from "../../static/images/bg4.jpg";
+import B5 from "../../static/images/bg5.jpg";
 import Typography from "@mui/material/Typography";
 import "../../static/css/modal.css";
 import { blueGrey, pink, teal } from "@mui/material/colors";
 import { useInView } from "react-intersection-observer";
 import Checkbox from '@mui/material/Checkbox';
 import useVisible from "./useVisible";
+
+function getImageSrc(randomNumber) {
+  switch (randomNumber) {
+    case 1:
+      return B1;
+    case 2:
+      return B2;
+    case 3:
+      return B3;
+    case 4:
+      return B4;
+    case 5:
+      return B5;
+    default:
+      return ''; // Default image or empty string if none is selected
+  }
+}
 
 const FadeInCard = ({ children }) => {
   const { ref, inView } = useInView({
@@ -46,7 +67,7 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
-export default function ItineraryCard({ itineraryData = [], onDelete }) {
+export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
   const preferredMode = useSelector((state) => state.mode);
   const [expanded, setExpanded] = React.useState(false);
   const [open, setOpen] = React.useState(false); // Assuming you want to control the open state of the modal
@@ -61,7 +82,8 @@ export default function ItineraryCard({ itineraryData = [], onDelete }) {
     setExpanded(!expanded);
   };
 
-  console.log(itineraryData);
+
+  // console.log(itineraryData);
 
   const handleClose = () => {
     setOpen(false); // This will close the modal when invoked
@@ -81,49 +103,64 @@ export default function ItineraryCard({ itineraryData = [], onDelete }) {
     new Array(itineraryData.length).fill().map(() => React.createRef())
   );
 
-  // Effect to attach the IntersectionObserver to each ref
+  const [randomNumber, setRandomNumber] = useState(null);
+
   React.useEffect(() => {
-    const observerCallback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Use the entry's target to find the index and update visibility state
-          const index = itemRefs.current.indexOf(entry.target);
-          setVisibility((prevVisibility) => ({
-            ...prevVisibility,
-            [index]: true, // Set visible
-          }));
-        }
-      });
-    };
+    // Generate a random number between 1 and 5 only once when the component mounts
+    setRandomNumber(Math.floor(Math.random() * 5) + 1);
+  }, []);
 
-    const observerOptions = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.1,
-    };
+  const imageSrc = getImageSrc(randomNumber);
 
-    const observer = new IntersectionObserver(
-      observerCallback,
-      observerOptions
-    );
+  // Effect to attach the IntersectionObserver to each ref
+  // React.useEffect(() => {
+  //   const observerCallback = (entries, observer) => {
+  //     entries.forEach((entry) => {
+  //       if (entry.isIntersecting) {
+  //         // Use the entry's target to find the index and update visibility state
+  //         const index = itemRefs.current.indexOf(entry.target);
+  //         setVisibility((prevVisibility) => ({
+  //           ...prevVisibility,
+  //           [index]: true, // Set visible
+  //         }));
+  //       }
+  //     });
+  //   };
 
-    itemRefs.current.forEach((ref) => {
-      if (ref.current) {
-        observer.observe(ref.current);
-      }
-    });
+  //   const observerOptions = {
+  //     root: null,
+  //     rootMargin: "0px",
+  //     threshold: 0.1,
+  //   };
 
-    // Cleanup observer on unmount
-    return () => {
-      if (itemRefs.current) {
-        itemRefs.current.forEach((ref) => {
-          if (ref.current) {
-            observer.unobserve(ref.current);
-          }
-        });
-      }
-    };
-  }, [itineraryData]);
+  //   const observer = new IntersectionObserver(
+  //     observerCallback,
+  //     observerOptions
+  //   );
+
+  //   itemRefs.current.forEach((ref) => {
+  //     if (ref.current) {
+  //       observer.observe(ref.current);
+  //     }
+  //   });
+
+  //   // Cleanup observer on unmount
+  //   return () => {
+  //     if (itemRefs.current) {
+  //       itemRefs.current.forEach((ref) => {
+  //         if (ref.current) {
+  //           observer.unobserve(ref.current);
+  //         }
+  //       });
+  //     }
+  //   };
+  // }, [itineraryData]);
+
+  if (!Array.isArray(itineraryData)) {
+    console.error('itineraryData is not an array', itineraryData);
+    // Handle the case when itineraryData is not an array
+    return;
+  }
 
   return (
     <Card
@@ -135,7 +172,7 @@ export default function ItineraryCard({ itineraryData = [], onDelete }) {
       {/* Card content */}
       <CardHeader
         avatar={
-          <Avatar sx={{ bgcolor: pink[500] }} aria-label="recipe">
+          <Avatar sx={{ bgcolor: pink[300] }} aria-label="recipe">
             S
           </Avatar>
         }
@@ -144,13 +181,13 @@ export default function ItineraryCard({ itineraryData = [], onDelete }) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={"Travel Card "}
+        title={"Travel Card " + index} 
         subheader={dateString}
       />
       <CardMedia
         component="img"
         height="194"
-        image={NewYork}
+        image= {imageSrc}
         alt="Travel Card"
       />
       <Collapse in={expanded} timeout="auto" unmountOnExit>
@@ -262,7 +299,7 @@ export default function ItineraryCard({ itineraryData = [], onDelete }) {
             onDelete();
           }}
         >
-          <ShareIcon />
+          <DeleteForeverIcon />
         </IconButton>
         <ExpandMore
           expand={expanded}
