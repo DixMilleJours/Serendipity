@@ -49,7 +49,7 @@ export default function SwipeableTemporaryDrawer({
         display: "flex", // Explicitly state the display type for clarity
         flexDirection: "column", // Stack items vertically
         alignItems: "center", // Center items horizontally
-        justifyContent: "center", // Center items vertically (if there is extra space)
+        // justifyContent: "center", // Center items vertically (if there is extra space)
         textAlign: "center",
         backgroundColor: preferredMode === "dark" ? blueGrey[900] : "#fff"
       }}

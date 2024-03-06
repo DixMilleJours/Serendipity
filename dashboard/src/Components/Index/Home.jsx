@@ -21,14 +21,16 @@ export default function Home(prefer) {
   const state = useSelector((state) => state.open);
   const [error, setError] = React.useState({ open: false, content: "" });
 
-  React.useEffect(() => {}, [currentUser]);
+  React.useEffect(() => {
+    // console.log(currentUser);
+  }, [currentUser]);
 
   return (
     <>
       <Canvas>
         <Navigation
           loggedin={currentUser != null}
-          username={"TODO"}
+          username={currentUser == null ? "S" : currentUser.displayName}
           prefer={prefer}
         />
 

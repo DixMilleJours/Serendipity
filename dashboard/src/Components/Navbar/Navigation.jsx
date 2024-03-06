@@ -30,7 +30,7 @@ import Logo from "../../static/images/logo.png";
 import FlexDisplay from "../Display/FlexDisplay";
 import { Bounce } from "../../Animations/Bounce";
 import { useNavigate } from "react-router-dom";
-import HistoryDrawer from './HistoryDrawer'
+import HistoryDrawer from "./HistoryDrawer";
 
 function useWindowSise() {
   const [windowWidth, setWindowWidth] = React.useState(0);
@@ -57,7 +57,8 @@ function Navigation({ loggedin, username }) {
   const [openMenu, setOpenMenu] = useState(false);
 
   const [isHistoryDrawer, setOpenHistoryDrawer] = React.useState(false);
-  const [isNorificationDrawer, setOpenNotificationDrawer] = React.useState(false);
+  const [isNotificationDrawer, setOpenNotificationDrawer] =
+    React.useState(false);
 
   const isNonMobileScreens = useMediaQuery("(min-width: 950px)");
   const theme = useTheme();
@@ -72,7 +73,7 @@ function Navigation({ loggedin, username }) {
   };
 
   const lHandleMouseOut = () => {
-    setIconColor(grey[500]); // Reset the color on mouse out 
+    setIconColor(grey[500]); // Reset the color on mouse out
   };
 
   const dHandleMouseOver = () => {
@@ -91,7 +92,6 @@ function Navigation({ loggedin, username }) {
     }
   };
 
- 
   React.useEffect(() => {
     if (windowWidth <= 444) {
       window.resizeTo(444, window.innerHeight);
@@ -114,7 +114,6 @@ function Navigation({ loggedin, username }) {
               "&:hover": {
                 color: primaryLight,
                 cursor: "pointer",
-                
               },
               // fontFamily:"Nunito"
             }}
@@ -205,8 +204,18 @@ function Navigation({ loggedin, username }) {
                 Sign Up
               </Button>
             )}
-            {loggedin && <AccountMenu username={username} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
-            {loggedin && isHistoryDrawer && <HistoryDrawer openHistoryDrawer={isHistoryDrawer} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
+            {loggedin && (
+              <AccountMenu
+                username={username}
+                setOpenHistoryDrawer={setOpenHistoryDrawer}
+              />
+            )}
+            {loggedin && isHistoryDrawer && (
+              <HistoryDrawer
+                openHistoryDrawer={isHistoryDrawer}
+                setOpenHistoryDrawer={setOpenHistoryDrawer}
+              />
+            )}
           </FlexDisplay>
         ) : (
           <IconButton
@@ -276,7 +285,13 @@ function Navigation({ loggedin, username }) {
                 Sign Up
               </Button>
             )}
-            {loggedin && <AccountMenu username={username} />}
+            {loggedin && <AccountMenu username={username}  setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
+            {loggedin && isHistoryDrawer && (
+              <HistoryDrawer
+                openHistoryDrawer={isHistoryDrawer}
+                setOpenHistoryDrawer={setOpenHistoryDrawer}
+              />
+            )}
           </FlexDisplay>
         </Box>
       )}
