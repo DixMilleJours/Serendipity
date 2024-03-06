@@ -634,7 +634,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
                           <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                               sx={{
-                                width: "270px",
+                                width: "auto",
                               }}
                               label="Start date"
                               value={oStartDate}
@@ -648,7 +648,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
                           <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                               sx={{
-                                width: "270px",
+                                width: "auto",
                               }}
                               label="End date"
                               value={oEndDate}
@@ -833,9 +833,9 @@ function SearchBar({ loggedin, setError, setSelected }) {
 
                       <Grid xs={6}>
                         <Item style={{ display: "flex", flexDirection: "row" }}>
-                          <Box sx={{ minWidth: 270 }}>
+                          {/* <Box sx={{ minWidth: 270 }}> */}
                             <FormControl fullWidth>
-                              <InputLabel id="demo-simple-select-label">
+                              <InputLabel id="demo-simple-select-label" style={{width: 'auto'}}>
                                 Dining Preference
                               </InputLabel>
                               <Select
@@ -874,14 +874,14 @@ function SearchBar({ loggedin, setError, setSelected }) {
                                 </MenuItem>
                               </Select>
                             </FormControl>
-                          </Box>
+                          {/* </Box> */}
                         </Item>
                       </Grid>
                       <Grid xs={6}>
                         <Item style={{ display: "flex", flexDirection: "row" }}>
-                          <Box sx={{ minWidth: 270 }}>
+                          {/* <Box sx={{ minWidth: 270 }}> */}
                             <FormControl fullWidth>
-                              <InputLabel id="demo-simple-select-label">
+                              <InputLabel id="demo-simple-select-label" style={{width: 'auto'}}>
                                 Trip Preference
                               </InputLabel>
                               <Select
@@ -922,7 +922,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
                                 </MenuItem>
                               </Select>
                             </FormControl>
-                          </Box>
+                          {/* </Box> */}
                         </Item>
                       </Grid>
                     </Grid>

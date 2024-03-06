@@ -22,8 +22,8 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        reactLocalStorage.set("currentUser", user.uid)
-        setcurrentUser(user.uid);
+        reactLocalStorage.set("currentUser", user)
+        setcurrentUser(user);
       } else {
         reactLocalStorage.remove("currentUser")
         setcurrentUser(null);

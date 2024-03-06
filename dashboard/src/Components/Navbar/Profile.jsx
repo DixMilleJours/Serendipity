@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
@@ -10,10 +10,14 @@ import Tooltip from "@mui/material/Tooltip";
 import HistoryIcon from "@mui/icons-material/History";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Logout from "@mui/icons-material/Logout";
+import { useAuth } from "../../AuthContext";
 import { auth } from "../../firebase";
 
-export default function AccountMenu({ username,  setOpenHistoryDrawer}) {
+export default function AccountMenu({ username, setOpenHistoryDrawer }) {
+  const currentUser = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
+
+  console.log(currentUser)
 
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -28,6 +32,10 @@ export default function AccountMenu({ username,  setOpenHistoryDrawer}) {
     window.location.href = "/home";
   };
 
+  useEffect(() => {
+
+  }, [currentUser])
+
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
@@ -40,7 +48,9 @@ export default function AccountMenu({ username,  setOpenHistoryDrawer}) {
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>{username[0]}</Avatar>
+            <Avatar sx={{ width: 32, height: 32 }} src={currentUser.photoURL}>
+              {currentUser.displayName}
+            </Avatar>
           </IconButton>
         </Tooltip>
       </Box>
@@ -79,7 +89,11 @@ export default function AccountMenu({ username,  setOpenHistoryDrawer}) {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem onClick={() => {setOpenHistoryDrawer(true)}}>
+        <MenuItem
+          onClick={() => {
+            setOpenHistoryDrawer(true);
+          }}
+        >
           <ListItemIcon>
             <HistoryIcon fontSize="small" />
           </ListItemIcon>
