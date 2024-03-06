@@ -7,7 +7,7 @@ Follw the link above to learn about how to set-up Cloud Functions environment an
 # Must-Do
 - ! Download packages: MUST go to `functions` folder
 `npm install`
-`npm install -g firebase-tools`
+`sudo npm install -g firebase-tools`
 
 - Follow step 2 in `Description` to learn about how to test functions with the emulator
 `npm run serve` should start the emulator. If the cloud function is correct, it will give you a link.

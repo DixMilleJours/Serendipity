@@ -9,7 +9,7 @@ const { Configuration, OpenAIApi } = require("openai");
 
 // Setup OpenAI API configuration with the fetched OpenAI key
 const configuration = new Configuration({
-    apiKey: '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',
+    apiKey: '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',
 });
 
 // const placeAPIKey = '5ae2e3f221c38a28845f05b63e357b1b0a0ade8195a1ccd5ba27738b'
@@ -37,155 +37,155 @@ var amadeus = new Amadeus({
 
 /* Cloud functions start here... */
 // deprecated
-exports.searchFlight = functions.https.onRequest(async (req, res) => {
-    // ! Crucial, must use the cors wrapper.
-    cors(req, res, () => {
-        const TOKEN = 'duffel_test_jmmpvZzOOkD-qvaahFZGjjqtGXFcT8jipwFdcx-bIBH';
-        var searchID = ''
+// exports.searchFlight = functions.https.onRequest(async (req, res) => {
+//     // ! Crucial, must use the cors wrapper.
+//     cors(req, res, () => {
+//         const TOKEN = 'duffel_test_jmmpvZzOOkD-qvaahFZGjjqtGXFcT8jipwFdcx-bIBH';
+//         var searchID = ''
 
-        const data = req.body
+//         const data = req.body
 
-        const headers = {
-            'Accept-Encoding': 'gzip',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Duffel-Version': 'v1',
-            'Authorization': `Bearer ${TOKEN}`
-        }
+//         const headers = {
+//             'Accept-Encoding': 'gzip',
+//             'Accept': 'application/json',
+//             'Content-Type': 'application/json',
+//             'Duffel-Version': 'v1',
+//             'Authorization': `Bearer ${TOKEN}`
+//         }
 
-        // First, find all flights satisfying user inputs.
-        axios.post(
-            'https://api.duffel.com/air/offer_requests?return_offers=false&supplier_timeout=10000', data, { headers })
-            .then((res) => {
-                // Record the search id.
-                // ! Notice the first `data` is mandatory from Axios.
-                searchID = res.data.data.id;
-                // Then, get those found flights.
-                return axios.get('https://api.duffel.com/air/offers', {
-                    params: {
-                        // Use the recorded search id to fetch the entire list of eligible flights.
-                        offer_request_id: searchID,
-                        limit: 10,
-                        sort: "total_amount",
-                        max_connections: 0
-                    },
-                    headers
-                }
-                )
-            }).then((response) => {
-                // ! Crucial, must set this.
-                res.set('Access-Control-Allow-Origin', '*');
-                res.send(response.data)
-            })
-            .catch((error) => {
+//         // First, find all flights satisfying user inputs.
+//         axios.post(
+//             'https://api.duffel.com/air/offer_requests?return_offers=false&supplier_timeout=10000', data, { headers })
+//             .then((res) => {
+//                 // Record the search id.
+//                 // ! Notice the first `data` is mandatory from Axios.
+//                 searchID = res.data.data.id;
+//                 // Then, get those found flights.
+//                 return axios.get('https://api.duffel.com/air/offers', {
+//                     params: {
+//                         // Use the recorded search id to fetch the entire list of eligible flights.
+//                         offer_request_id: searchID,
+//                         limit: 10,
+//                         sort: "total_amount",
+//                         max_connections: 0
+//                     },
+//                     headers
+//                 }
+//                 )
+//             }).then((response) => {
+//                 // ! Crucial, must set this.
+//                 res.set('Access-Control-Allow-Origin', '*');
+//                 res.send(response.data)
+//             })
+//             .catch((error) => {
 
-            });
-    })
-});
+//             });
+//     })
+// });
 
-exports.searchFlightV2 = functions.https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
-        await amadeus.shopping.flightOffersSearch.get({
-            // TODO - Get request from front-end.
-            originLocationCode: 'YYZ',
-            destinationLocationCode: 'JFK',
-            departureDate: '2023-07-20',
-            returnDate: '2023-07-24',
-            adults: '1',
-            children: '1',
-            travelClass: 'ECONOMY',
-            max: '10',
-            nonStop: 'true'
-        }).then((response) => {
-            let flightRes = response.data.map(item => ({
-                carrier: item.validatingAirlineCodes[0],
-                currency: item.price.currency,
-                price: item.price.grandTotal,
-                go_duration: item.itineraries[0].duration,
-                go_departure: item.itineraries[0].segments[0].departure.iataCode,
-                go_departure_time: item.itineraries[0].segments[0].departure.at,
-                go_terminal: item.itineraries[0].segments[0].departure.terminal,
-                go_arrival: item.itineraries[0].segments[0].arrival.iataCode,
-                go_arrival_time: item.itineraries[0].segments[0].arrival.at,
-                leave_duration: item.itineraries[1].duration,
-                leave_departure: item.itineraries[1].segments[0].departure.iataCode,
-                leave_departure_time: item.itineraries[1].segments[0].departure.at,
-                leave_terminal: item.itineraries[1].segments[0].departure.terminal,
-                leave_arrival: item.itineraries[1].segments[0].arrival.iataCode,
-                leave_arrival_time: item.itineraries[1].segments[0].arrival.at
-            }))
-            res.set('Access-Control-Allow-Origin', '*');
-            res.send(flightRes)
-        }).catch((error) => {
-            res.set('Access-Control-Allow-Origin', '*');
-            res.send(error)
-        });
-    })
-})
+// exports.searchFlightV2 = functions.https.onRequest(async (req, res) => {
+//     cors(req, res, async () => {
+//         await amadeus.shopping.flightOffersSearch.get({
+//             // TODO - Get request from front-end.
+//             originLocationCode: 'YYZ',
+//             destinationLocationCode: 'JFK',
+//             departureDate: '2023-07-20',
+//             returnDate: '2023-07-24',
+//             adults: '1',
+//             children: '1',
+//             travelClass: 'ECONOMY',
+//             max: '10',
+//             nonStop: 'true'
+//         }).then((response) => {
+//             let flightRes = response.data.map(item => ({
+//                 carrier: item.validatingAirlineCodes[0],
+//                 currency: item.price.currency,
+//                 price: item.price.grandTotal,
+//                 go_duration: item.itineraries[0].duration,
+//                 go_departure: item.itineraries[0].segments[0].departure.iataCode,
+//                 go_departure_time: item.itineraries[0].segments[0].departure.at,
+//                 go_terminal: item.itineraries[0].segments[0].departure.terminal,
+//                 go_arrival: item.itineraries[0].segments[0].arrival.iataCode,
+//                 go_arrival_time: item.itineraries[0].segments[0].arrival.at,
+//                 leave_duration: item.itineraries[1].duration,
+//                 leave_departure: item.itineraries[1].segments[0].departure.iataCode,
+//                 leave_departure_time: item.itineraries[1].segments[0].departure.at,
+//                 leave_terminal: item.itineraries[1].segments[0].departure.terminal,
+//                 leave_arrival: item.itineraries[1].segments[0].arrival.iataCode,
+//                 leave_arrival_time: item.itineraries[1].segments[0].arrival.at
+//             }))
+//             res.set('Access-Control-Allow-Origin', '*');
+//             res.send(flightRes)
+//         }).catch((error) => {
+//             res.set('Access-Control-Allow-Origin', '*');
+//             res.send(error)
+//         });
+//     })
+// })
 
-exports.searchHotels = functions.https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
-        await amadeus.referenceData.locations.hotels.byCity.get({
-            cityCode: 'JFK',
-            ratings: "4",
-            radius: "30"
-        }).then(async (response) => {
-            // Limit hotel count to 10.
-            var limitedHotels = response.data.slice(0, 10);
+// exports.searchHotels = functions.https.onRequest(async (req, res) => {
+//     cors(req, res, async () => {
+//         await amadeus.referenceData.locations.hotels.byCity.get({
+//             cityCode: 'JFK',
+//             ratings: "4",
+//             radius: "30"
+//         }).then(async (response) => {
+//             // Limit hotel count to 10.
+//             var limitedHotels = response.data.slice(0, 10);
 
-            let hotelInfo = limitedHotels.map((hotel) => ({
-                hotelName: hotel.name,
-                hotelId: hotel.hotelId
-            }))
+//             let hotelInfo = limitedHotels.map((hotel) => ({
+//                 hotelName: hotel.name,
+//                 hotelId: hotel.hotelId
+//             }))
 
-            let hotelIds = hotelInfo.map((hotel) => hotel.hotelId);
+//             let hotelIds = hotelInfo.map((hotel) => hotel.hotelId);
 
-            return await amadeus.shopping.hotelOffersSearch.get({
-                hotelIds: JSON.stringify(hotelIds),
-                adults: '1',
-                checkInDate: '2023-07-20',
-                checkOutDate: '2023-07-24',
-                roomQuantity: '1',
-            })
-        }).then((response) => {
-            let hotelRes = response.data.map((hotel) => ({
-                hotelId: hotel.hotel.hotelId,
-                hotelName: hotel.hotel.name,
-                offerId: hotel.offers[0].id,
-                offerPrice: hotel.offers[0].price.total,
-                offerCurrency: hotel.offers[0].price.currency
-            }))
-            res.set('Access-Control-Allow-Origin', '*');
-            res.send(hotelRes)
-        }).catch((error) => {
-            res.set('Access-Control-Allow-Origin', '*');
-            res.send(error)
-        });
-    })
-})
+//             return await amadeus.shopping.hotelOffersSearch.get({
+//                 hotelIds: JSON.stringify(hotelIds),
+//                 adults: '1',
+//                 checkInDate: '2023-07-20',
+//                 checkOutDate: '2023-07-24',
+//                 roomQuantity: '1',
+//             })
+//         }).then((response) => {
+//             let hotelRes = response.data.map((hotel) => ({
+//                 hotelId: hotel.hotel.hotelId,
+//                 hotelName: hotel.hotel.name,
+//                 offerId: hotel.offers[0].id,
+//                 offerPrice: hotel.offers[0].price.total,
+//                 offerCurrency: hotel.offers[0].price.currency
+//             }))
+//             res.set('Access-Control-Allow-Origin', '*');
+//             res.send(hotelRes)
+//         }).catch((error) => {
+//             res.set('Access-Control-Allow-Origin', '*');
+//             res.send(error)
+//         });
+//     })
+// })
 
-exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
-    const flightData = data.flightData;
-    const budget = data.budget;
+// exports.getOptimalFlight = functions.https.onCall(async (data, context) => {
+//     const flightData = data.flightData;
+//     const budget = data.budget;
 
-    // !!!! budget is an array of 2 numbers, so will need to change the prompt.
-    const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, return the optimal flight in human-readable sentence. No explanation.`;
+//     // !!!! budget is an array of 2 numbers, so will need to change the prompt.
+//     const prompt = `Given the flight data ${JSON.stringify(flightData)} and a budget of ${budget}, return the optimal flight in human-readable sentence. No explanation.`;
 
-    try {
-        const gptResponse = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ]
-        })
-        return { gptResponse: gptResponse.data.choices[0].message }
-    } catch (error) {
-        return { error: 'An error occurred while processing your request.' };
-    }
-});
+//     try {
+//         const gptResponse = await openai.createChatCompletion({
+//             model: 'gpt-3.5-turbo',
+//             messages: [
+//                 {
+//                     role: 'user',
+//                     content: prompt
+//                 }
+//             ]
+//         })
+//         return { gptResponse: gptResponse.data.choices[0].message }
+//     } catch (error) {
+//         return { error: 'An error occurred while processing your request.' };
+//     }
+// });
 
 async function searchHotels(data) {
     try {
@@ -196,7 +196,7 @@ async function searchHotels(data) {
         })
         // Error handling.
         if (!response1.data.length) {
-            throw new Error('No hotels found');
+            throw new Error('No hotels found for the selected criteria.');
         }
         // Limit hotel count to 10.
         var limitedHotels = response1.data.slice(0, 10);
@@ -209,15 +209,15 @@ async function searchHotels(data) {
         let hotelIds = hotelInfo.map((hotel) => hotel.hotelId);
         const response2 = await amadeus.shopping.hotelOffersSearch.get({
             hotelIds: JSON.stringify(hotelIds),
-            adults: data.hotelDetails[1],
+            adults: data.adults,
             // TODO -> change check in / out date.
             checkInDate: data.startDate,
             checkOutDate: data.endDate,
-            roomQuantity: data.hotelDetails[0],
+            roomQuantity: data.rooms,
         })
         // Error handling.
         if (!response2.data.length) {
-            throw new Error('No hotel offers found');
+            throw new Error('No hotel offerings found for the selected criteria.');
         }
         let hotelRes = response2.data.map((hotel) => ({
             // hotelId: hotel.hotel.hotelId,
@@ -230,7 +230,7 @@ async function searchHotels(data) {
         }))
         return hotelRes
     } catch (error) {
-        throw new Error(`search hotels error: ${error.message}`);
+        throw new Error('No hotel offerings found for the selected criteria.');
     }
 }
 
@@ -250,10 +250,11 @@ async function searchFlight(data) {
         })
         // Error handling.
         if (!response.data.length) {
-            throw new Error('No flights found');
+            throw new Error('No flights found for the selected criteria.');
         }
         let flightRes = response.data.map(item => ({
-            carrier: item.validatingAirlineCodes[0],
+            departureFlightCode: item.validatingAirlineCodes[0] + item.itineraries[0].segments[0].number,
+            returnFlightCode: item.validatingAirlineCodes[0] + item.itineraries[1].segments[0].number,
             currency: item.price.currency,
             price: item.price.grandTotal,
             // go_duration: item.itineraries[0].duration,
@@ -271,61 +272,64 @@ async function searchFlight(data) {
         }))
         return flightRes
     } catch (error) {
-        throw new Error(`search flights API error: ${error.message}`);
+        throw new Error("No flights found for the selected criteria.");
     }
 }
 
-async function searchPlacesV2() {
-    try {
-        const response = await axios.get('https://api.opentripmap.com/0.1/en/places/radius?', {
-            params: {
-                apikey: placeAPIKey,
-                radius: 5000,
-                lat: 32.05458124467749,
-                lon: 118.78957564478667,
-                kinds: "restaurants",
-                format: "json",
-                limit: 10
-            }
-        });
-        console.log(response.data)
-        return response.data
-    } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
-    }
-}
+async function gpt({ flight, hotel, restaurant, poi, start, end, foodPref, poiPref }) {
 
-async function gpt({flight, hotel, restaurant, poi}) {
+    const promptV3 = `Please suggest the best itinerary for my trip, formatted in a day-by-day manner (Day 1, Day 2, etc.). The itinerary should be in human-readable, intriguing and explanatory sentences, and should not include any assumptions not specified in the data provided.
 
-    // !!!! budget is an array of 2 numbers, so will need to change the prompt.
-    const prompt = `Given JSON data for the flight ${JSON.stringify(flight)}, the hotel ${JSON.stringify(hotel)}, the restaurant ${JSON.stringify(restaurant)}, and the tourist attraction ${JSON.stringify(poi)}, return the best itinerary in short human-readable sentence. No explanation.`;
+    The itinerary must include:
+    - Clearly mention start date ${start} and end date ${end} of this itinerary.
+    - One hotel check-in on ${start} and check-out on ${end}.
+    - Return flight must be on ${end}.
+    - Clear explanations of the two flights to take with departure times and flight codes.
+    - Brief, interesting highlights of each suggested tourist attraction to give a clear sense of what to expect.
+    - Recommendations for two meals per day, with no meal in the morning.
+    - A balance of restaurant and tourist attraction recommendations, with half based on user preferences of ${foodPref} food and ${poiPref} tourist attraction, and the other half not based on these preferences to ensure diversity.
 
-    const promptV2 = `Please suggest an optimal itinerary for my trip in human-readable and intriguing sentences.
-    Number of Meals per Day: 2
-    Preferences:
-    Flights: ${JSON.stringify(flight)}
-    Hotels: ${JSON.stringify(hotel)}
-    Restaurants: ${JSON.stringify(restaurant)}
-    Tourist Attractions: ${JSON.stringify(poi)}
-    Please format the response using line breaks or special characters to ensure better readability when displayed on the front-end UI.`
+    !! Do not include any notes, disclaimers, or additional information at the end of the itinerary.
+
+    Details:
+    - Flights: ${JSON.stringify(flight)}
+    - Hotels: ${JSON.stringify(hotel)}
+    - Restaurants: ${JSON.stringify(restaurant)}
+    - Tourist Attractions: ${JSON.stringify(poi)}
+
+    The response should be formatted using line breaks or special characters for better readability when displayed on the front-end UI.
+    After that, the final response must be in JSON format. This JSON response must follow the below format:
+    response = [
+        title: // The title of this itinerary. This must be an individual key-value pair not inside the following key-value pairs.
+        {
+            day: // The day number and its corresponding date.
+            activities: [
+            ] // A list of all activities happening in this day. Notice the activities are separated based on the line breaks.
+        },
+        {
+        } // Same as above for the next day.
+        ending: // The ending sentence summarizing this itinerary. This must be an individual key-value pair not inside the above key-value pairs.
+    ]`;
+
 
     try {
         const gptResponse = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4-turbo-preview',
             messages: [
                 {
                     role: 'user',
-                    content: promptV2
+                    content: promptV3
                 }
-            ]
+            ],
+            temperature: 0.1
         })
         return gptResponse.data.choices[0].message
     } catch (error) {
-        throw new Error(`GPT-3 API error: ${error.message}`);
+        throw new Error('We encountered a problem while recommending the itinerary. Please try again.');
     }
 }
 
-async function fetchRestaurants({averageLat, averageLong, userPreference}) {
+async function fetchRestaurants({ averageLat, averageLong, userPreference }) {
     try {
         // First fetch with user preference
         const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -339,7 +343,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
                 key: `${googleAPI}`
             }
         })
-        let firstResults = response1.data.results;
+        let firstResults = response1.data.results.slice(0, 10);
 
         // Second fetch for any cuisine
         const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -357,7 +361,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
 
         // Only add places from the secondResults that have a new place_id
         for (let place of secondResults) {
-            if (!ids.has(place.place_id)) {
+            if (!ids.has(place.place_id) && firstResults.length < 20) {
                 firstResults.push(place);
                 ids.add(place.place_id);
             }
@@ -372,7 +376,7 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
 
         // Error handling.
         if (!finalResults.length) {
-            throw new Error('No restaurants found');
+            throw new Error('No restaurants found for the selected criteria.');
         }
         let restaurantRes = finalResults.map((res) => ({
             resName: res.name,
@@ -382,41 +386,11 @@ async function fetchRestaurants({averageLat, averageLong, userPreference}) {
         }))
         return restaurantRes
     } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
+        throw new Error('No restaurants found for the selected criteria.');
     }
 }
 
-async function searchRestaurants() {
-    try {
-        const response = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
-            params: {
-                keyword: 'vietnamese or mexican',
-                location: '43.472599613636696, -80.53789113576617',
-                radius: 4000,
-                maxprice: '',
-                minprice: '',
-                type: 'restaurant',
-                key: `${googleAPI}`
-            }
-        })
-        // Error handling.
-        if (!response.data.results.length) {
-            throw new Error('No hotels found');
-        }
-        let restaurantRes = response.data.results.map((res) => ({
-            resName: res.name,
-            resID: res.place_id,
-            resRating: res.rating,
-            resTypes: res.types
-        }))
-        console.log(restaurantRes)
-        return restaurantRes
-    } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
-    }
-}
-
-async function searchTouristAttraction({averageLat, averageLong, userPreference}) {
+async function searchTouristAttraction({ averageLat, averageLong, userPreference }) {
     try {
         const response1 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
             params: {
@@ -429,7 +403,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
                 key: `${googleAPI}`
             }
         })
-        let firstResults = response1.data.results;
+        let firstResults = response1.data.results.slice(0, 10);
 
         // Second fetch for any cuisine
         const response2 = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
@@ -447,7 +421,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
 
         // Only add places from the secondResults that have a new place_id
         for (let place of secondResults) {
-            if (!ids.has(place.place_id)) {
+            if (!ids.has(place.place_id) && firstResults.length < 20) {
                 firstResults.push(place);
                 ids.add(place.place_id);
             }
@@ -461,7 +435,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
 
         // Error handling.
         if (!finalResults.length) {
-            throw new Error('No attractions found');
+            throw new Error('No attractions found for the selected criteria.');
         }
         let touristAttractionRes = finalResults.map((data) => ({
             touristAttractionName: data.name,
@@ -471,7 +445,7 @@ async function searchTouristAttraction({averageLat, averageLong, userPreference}
         }))
         return touristAttractionRes
     } catch (error) {
-        throw new Error(`search places API error: ${error.message}`);
+        throw new Error('No tourist attractions found for the selected criteria.');
     }
 }
 
@@ -482,16 +456,20 @@ exports.generator = functions.https.onCall(async (data, context) => {
         const flightData = data.flightData;
         const hotelData = data.hotelData;
         const userPreference = data.userPreference;
+        const start = flightData.startDate;
+        const end = flightData.endDate;
+        const foodPref = userPreference.restaurant;
+        const poiPref = userPreference.poi;
 
         /* Second, make API calls.  */
 
         // !!! local test for now.
         const flightPromise = searchFlight(flightData)
-        const hotelPromise =  searchHotels(hotelData)
+        const hotelPromise = searchHotels(hotelData)
         const [flightResponse, hotelResponse] = await Promise.all([flightPromise, hotelPromise]);
         const { averageLat, averageLong } = getAverageLatLong(hotelResponse);
-        const restaurantResponse = await fetchRestaurants({averageLat, averageLong, userPreference})
-        const poiResponse = await searchTouristAttraction({averageLat, averageLong, userPreference})
+        const restaurantResponse = await fetchRestaurants({ averageLat, averageLong, userPreference })
+        const poiResponse = await searchTouristAttraction({ averageLat, averageLong, userPreference })
 
         // Data cleaning before passing into gpt.
         let flight = flightResponse.map(({ go_duration, leave_duration, ...rest }) => rest);
@@ -503,13 +481,17 @@ exports.generator = functions.https.onCall(async (data, context) => {
             flight,
             hotel,
             restaurant,
-            poi
+            poi,
+            start,
+            end,
+            foodPref,
+            poiPref
         })
         const finalResult = gptResponse.content;
         return { finalResult: finalResult }
     } catch (error) {
         console.error(error);
-        throw new functions.https.HttpsError('unknown', error.message);
+        throw new functions.https.HttpsError('internal', error.message);
     }
 })
 
@@ -527,5 +509,4 @@ function getAverageLatLong(hotels) {
 
     return { averageLat, averageLong };
 }
-
 

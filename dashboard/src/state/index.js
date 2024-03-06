@@ -6,8 +6,9 @@ const initialState = {
   token: null,
   departure: "",
   destination: "",
-  travels: [],
-  hotels: [],
+  travels: ["", "", 0, 0, "", ""],
+  hotels: [0, 0, 0],
+  travelCards: []
 };
 
 export const authSlice = createSlice({
@@ -32,18 +33,26 @@ export const authSlice = createSlice({
     setTravel: (state, action) => {
       state.travels[0] = action.payload.way;
       state.travels[1] = action.payload.classOption;
-      state.travels[2] = action.payload.adults;
-      state.travels[3] = action.payload.children;
+      state.travels[2] = isNaN(action.payload.adults) ? 0 : action.payload.adults;
+      state.travels[3] = isNaN(action.payload.children) ? 0 : action.payload.children;
+      state.travels[4] = action.payload.departure;
+      state.travels[5] = action.payload.destination;
     },
     setHotel: (state, action) => {
-      state.hotels[0] = action.payload.room;
-      state.hotels[1] = action.payload.adults;
-      state.hotels[2] = action.payload.children;
+      state.hotels[0] = isNaN(action.payload.room) ? 0 : action.payload.room;
+      state.hotels[1] = isNaN(action.payload.adults) ? 0 : action.payload.adults;
+      state.hotels[2] = isNaN(action.payload.children) ? 0 : action.payload.children;
     },
-    
+    setTravelCard: (state, action) => {
+      state.travelCards.push(action.payload.store);
+    },
+    removeTravelCard: (state, action) => {
+      const indexToDelete = action.payload;
+      state.travelCards = state.travelCards.filter((_, index) => index !== indexToDelete);
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setLocation, setTravel, setHotel } =
+export const { setMode, setLogin, setLogout, setLocation, setTravel, setHotel, setTravelCard, removeTravelCard } =
   authSlice.actions;
 export default authSlice.reducer;

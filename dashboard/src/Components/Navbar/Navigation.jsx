@@ -30,6 +30,7 @@ import Logo from "../../static/images/logo.png";
 import FlexDisplay from "../Display/FlexDisplay";
 import { Bounce } from "../../Animations/Bounce";
 import { useNavigate } from "react-router-dom";
+import HistoryDrawer from './HistoryDrawer'
 
 function useWindowSise() {
   const [windowWidth, setWindowWidth] = React.useState(0);
@@ -55,6 +56,9 @@ function Navigation({ loggedin, username }) {
   const [isDroppedDown, setDroppedDown] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
 
+  const [isHistoryDrawer, setOpenHistoryDrawer] = React.useState(false);
+  const [isNorificationDrawer, setOpenNotificationDrawer] = React.useState(false);
+
   const isNonMobileScreens = useMediaQuery("(min-width: 950px)");
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
@@ -64,11 +68,11 @@ function Navigation({ loggedin, username }) {
   const alt = theme.palette.background.alt;
 
   const lHandleMouseOver = () => {
-    setIconColor(grey[900]); // Change the color to grey[900] on mouse over
+    setIconColor(grey[700]); // Change the color to grey[900] on mouse over
   };
 
   const lHandleMouseOut = () => {
-    setIconColor(blueGrey[500]); // Reset the color on mouse out
+    setIconColor(grey[500]); // Reset the color on mouse out 
   };
 
   const dHandleMouseOver = () => {
@@ -164,9 +168,9 @@ function Navigation({ loggedin, username }) {
                 />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
+            {/* <Message sx={{ fontSize: "25px" }} />
             <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
+            <Help sx={{ fontSize: "25px" }} /> */}
             {!loggedin && (
               <Button
                 variant="contained"
@@ -201,7 +205,8 @@ function Navigation({ loggedin, username }) {
                 Sign Up
               </Button>
             )}
-            {loggedin && <AccountMenu username={username} />}
+            {loggedin && <AccountMenu username={username} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
+            {loggedin && isHistoryDrawer && <HistoryDrawer openHistoryDrawer={isHistoryDrawer} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
           </FlexDisplay>
         ) : (
           <IconButton
