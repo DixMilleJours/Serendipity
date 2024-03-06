@@ -9,14 +9,14 @@ const { Configuration, OpenAIApi } = require("openai");
 
 // Setup OpenAI API configuration with the fetched OpenAI key
 const configuration = new Configuration({
-    apiKey: process.env.Amadeus_apiKey,
+    apiKey: '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',
 });
 
 // const placeAPIKey = '5ae2e3f221c38a28845f05b63e357b1b0a0ade8195a1ccd5ba27738b'
 
 // const yelpAPIKey = '-IdRLtv_5oNUULaCzsJ9GwDQTyV2YKgwlWgZT6v5hbniOgh0l0hEbQUCkacFvfZ_R6HPYTDx_hhZU0ewgrCC0vkYhLmvQ6qNDKS1hGe6nvc93mnBwJ5g1WzoCPC3ZHYx'
 
-const googleAPI = process.env.googleAPI
+const googleAPI = 'AIzaSyArF98C3uGVEnul-hfQwmZTRfPK8kmlzIs'
 
 const openai = new OpenAIApi(configuration);
 
@@ -30,9 +30,9 @@ const Amadeus = require('amadeus');
 
 /* Credentials start here... */
 var amadeus = new Amadeus({
-    hostname: process.env.Amadeus_HOSTNAME,
-    clientId: process.env.Amadeus_clientId,
-    clientSecret: process.env.Amadeus_clientSecret
+    hostname: 'production',
+    clientId: '7mjGX9eTRAs8VJe3JeAcylCiZBUQoRy0',
+    clientSecret: 'fwM8VVtfG05pEgzi'
 });
 
 /* Cloud functions start here... */
