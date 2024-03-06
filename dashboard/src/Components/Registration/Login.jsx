@@ -138,7 +138,7 @@ function Login({ setOpenLogin }) {
           <div className="contentBox">
             <div className="formBox">
               <h3 className="login">Login</h3>
-              {error && <Alert>{error}</Alert>}
+              {error && <Alert severity="error">{error}</Alert>}
               <form onSubmit={handleSubmit}>
                 <FormControl variant="outlined" margin="normal">
                   <InputLabel htmlFor="outlined-adornment-password">

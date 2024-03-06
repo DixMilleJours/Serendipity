@@ -6,7 +6,7 @@ import { Alert, Container } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import SearchBar from "../Search/SearchBar";
 import MediaCard from "../Display/MediaCard";
-import Slide from "@mui/material/Slide";
+import Fade from "@mui/material/Fade";
 import "../../index.css";
 import "../../static/css/login.css";
 import { useAuth } from "../../AuthContext";
@@ -47,20 +47,19 @@ export default function Home(prefer) {
           marginTop: "50px",
         }}
       >
-        {error.open && (
-          <Stack sx={{ width: "50%" }} spacing={2}>
-            <Slide in={error.open} mountOnEnter unmountOnExit>
-              <Alert
-                severity="error"
-                onClose={() => {
-                  setError({ open: false, content: "" });
-                }}
-              >
-                {error.content}
-              </Alert>
-            </Slide>
-          </Stack>
-        )}
+        <Stack sx={{ width: "50%" }} spacing={2}>
+          <Fade in={error.open} mountOnEnter unmountOnExit>
+            <Alert
+              severity="error"
+              onClose={() => {
+                setError({ open: false, content: "" });
+              }}
+            >
+              {error.content}
+            </Alert>
+          </Fade>
+        </Stack>
+
         <SearchBar
           loggedin={currentUser != null}
           setError={setError}
@@ -71,7 +70,7 @@ export default function Home(prefer) {
 
         {/* <Bounce y={20}><MediaCard /></Bounce> */}
       </Container>
-      
+
       {!isSelected && <FeatureStacks />}
 
       <div style={{ height: 200 }}></div>

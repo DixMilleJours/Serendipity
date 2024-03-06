@@ -7,54 +7,67 @@ import {
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { Box } from "@mui/material";
-import { pink } from '@mui/material/colors';
+import Wave from "react-wavify";
+import { pink, blueGrey } from "@mui/material/colors";
 import "../../static/css/footer.css"; // Assuming you have a separate CSS file for styling
 
 const Footer = () => {
   const preferredMode = useSelector((state) => state.mode);
+  const waveColor = preferredMode === "dark" ? blueGrey[800] : pink[50]
+  const fontColor = preferredMode === "dark" ? pink[50] : blueGrey[800]
   return (
-    <footer className="footer-container">
-      <div className="footer-content">
-        <Box
-          height={`200px`}
-          width="100%"
-          sx={{
-            background:
-              preferredMode === "dark"
-                ? // ? "linear-gradient(180deg,rgba(0,0,0,255) 0,rgba(0,0,0,0) 100%),linear-gradient(90deg,rgba(80,227,194,0.2) 0,rgba(0,112,243,0.2) 100%)"
-                  // : "linear-gradient(181deg,rgba(255,255,255,255) 0,rgba(255,255,255,0) 100%),linear-gradient(90deg,rgba(80,227,194,0.08) 0,rgba(0,112,243,0.08) 100%)",
-                  "linear-gradient(180deg, rgba(0,0,0,255) 0%, rgba(0,0,0,0) 100%), linear-gradient(90deg, rgba(255,105,180,0.2) 0%, rgba(255,182,193,0.2) 100%)"
-                : "linear-gradient(181deg, rgba(255,255,255,255) 0%, rgba(255,255,255,0) 100%), linear-gradient(90deg, rgba(255,105,180,0.08) 0%, rgba(255,182,193,0.08) 100%)",
-          }}
-        >
-          <div style={{height: 50}}></div>
-          <p style={{color: pink[500]}}>© 2024 Serendipity. All rights reserved.</p>
-          <div className="social-icons">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaFacebookF  style={{color: pink[700]}}/>
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaInstagram  style={{color: pink[700]}}/>
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaLinkedinIn style={{color: pink[700]}}/>
-            </a>
-          </div>
-        </Box>
-      </div>
-    </footer>
+    <>
+      <Wave
+        fill={waveColor}
+        paused={false}
+        options={{
+          height: 80,
+          amplitude: 20,
+          speed: 0.4,
+          points: 4,
+        }}
+        style={{ marginBottom: 0 }}
+      />
+      <footer className="footer-container" >
+        <div className="footer-content" style={{ marginTop: '-10px' }}>
+          <Box
+            height={`200px`}
+            width="100%"
+            sx={{
+              background: waveColor,
+            }}
+          >
+            <div style={{ height: 50 }}></div>
+            <p style={{ color: fontColor, fontSize: "20px" }}>
+              © 2024 Serendipity. All rights reserved.
+            </p>
+            <div className="social-icons">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaFacebookF style={{ color: fontColor }} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaInstagram style={{ color: fontColor }} />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaLinkedinIn style={{ color: fontColor }} />
+              </a>
+            </div>
+          </Box>
+        </div>
+      </footer>
+    </>
   );
 };
 

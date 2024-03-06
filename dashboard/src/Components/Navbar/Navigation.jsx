@@ -30,6 +30,7 @@ import Logo from "../../static/images/logo.png";
 import FlexDisplay from "../Display/FlexDisplay";
 import { Bounce } from "../../Animations/Bounce";
 import { useNavigate } from "react-router-dom";
+import HistoryDrawer from './HistoryDrawer'
 
 function useWindowSise() {
   const [windowWidth, setWindowWidth] = React.useState(0);
@@ -54,6 +55,9 @@ function Navigation({ loggedin, username }) {
   // const user = useSelector((state) => state.user);
   const [isDroppedDown, setDroppedDown] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
+
+  const [isHistoryDrawer, setOpenHistoryDrawer] = React.useState(false);
+  const [isNorificationDrawer, setOpenNotificationDrawer] = React.useState(false);
 
   const isNonMobileScreens = useMediaQuery("(min-width: 950px)");
   const theme = useTheme();
@@ -201,7 +205,8 @@ function Navigation({ loggedin, username }) {
                 Sign Up
               </Button>
             )}
-            {loggedin && <AccountMenu username={username} />}
+            {loggedin && <AccountMenu username={username} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
+            {loggedin && isHistoryDrawer && <HistoryDrawer openHistoryDrawer={isHistoryDrawer} setOpenHistoryDrawer={setOpenHistoryDrawer}/>}
           </FlexDisplay>
         ) : (
           <IconButton

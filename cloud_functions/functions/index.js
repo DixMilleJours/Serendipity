@@ -510,4 +510,3 @@ function getAverageLatLong(hotels) {
     return { averageLat, averageLong };
 }
 
-
