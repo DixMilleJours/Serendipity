@@ -180,7 +180,7 @@ function SearchBar({ loggedin, setError, setSelected }) {
     try {
       setProgress(true);
       const functionss = getFunctions();
-      connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
+      // connectFunctionsEmulator(functionss, "127.0.0.1", 5001);
       const generator = httpsCallable(functionss, "generator");
       const finalResult = await generator({
         flightData,
