@@ -100,6 +100,7 @@ function TravelDetails({ setTravelModalOpen, setTravelDetails }) {
             style={{
               fontSize: "25pt",
             }}
+            className="h3-text"
           >
             Travel&nbsp;&nbsp;&nbsp;&nbsp;Details
           </h3>

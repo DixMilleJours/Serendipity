@@ -13,6 +13,35 @@ body {
   scroll-padding-top: 64px;
 }
 
+.h3-text{
+  margin-left: 1px;
+  text-align: left;
+  color: #607d8b;
+  font-weight: 600;
+  font-size: 1.5em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  border-bottom: 4px solid #ff4584;
+  display: inline-block;
+  letter-spacing: 1px;
+}
+
+.stacked-pictures {
+  position: relative;
+}
+
+.stacked-picture {
+  position: absolute;
+  transition: transform 2s ease;
+  /* Add other styles such as box-shadow for a more realistic effect */
+  width: 100px; /* or some other width */
+  height: 50px; /* or some other height */
+  object-fit: cover; /* This will ensure the image covers the area and maintains aspect ratio */
+  /* Optionally clip the images to rectangle */
+  clip-path: inset(0);
+}
+
+
 ::selection {
   background: #ffb7b7; /* Light red background for selected text */
 }

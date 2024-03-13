@@ -47,7 +47,7 @@ const FeatureStacks = () => {
             style={{ color: red[300] }}
           />
           <div>
-            <h3>Easy to Use</h3>
+            <h3 className="h3-text">Easy to Use</h3>
             <p>Generate your trip with just one step</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ const FeatureStacks = () => {
             style={{color: red[300] }}
           />
           <div>
-            <h3>Beautiful UI</h3>
+            <h3 className="h3-text">Beautiful UI</h3>
             <p>Choose your prefered mode</p>
           </div>
         </div>
@@ -84,7 +84,7 @@ const FeatureStacks = () => {
             style={{  color: red[300] }}
           />
           <div>
-            <h3>Cloud Store</h3>
+            <h3 className="h3-text">Cloud Store</h3>
             <p>Remember your last trip details</p>
           </div>
         </div>
@@ -113,7 +113,7 @@ const FeatureStacks = () => {
               style={{ marginRight: "20px", color: red[300] }}
             />
             <div>
-              <h3>Easy to Use</h3>
+              <h3 className="h3-text">Easy to Use</h3>
               <p>Generate your trip with just one step</p>
             </div>
           </div>
@@ -132,7 +132,7 @@ const FeatureStacks = () => {
               style={{ marginLeft: "20px", color: red[300] }}
             />
             <div>
-              <h3>Beautiful UI</h3>
+              <h3 className="h3-text">Beautiful UI</h3>
               <p>Choose your prefered mode</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ const FeatureStacks = () => {
               style={{ marginRight: "20px", color: red[300] }}
             />
             <div>
-              <h3>Cloud Store</h3>
+              <h3 className="h3-text">Cloud Store</h3>
               <p>Remember your last trip details</p>
             </div>
           </div>
