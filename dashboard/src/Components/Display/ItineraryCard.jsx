@@ -152,7 +152,7 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={"Travel Card " + index}
+        title={"Travel Card " + (index + 1)}
         subheader={dateString}
       />
       <CardMedia
