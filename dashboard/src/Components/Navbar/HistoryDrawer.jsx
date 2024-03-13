@@ -57,7 +57,7 @@ export default function SwipeableTemporaryDrawer({
       //   onClick={toggleDrawer(false)}
       //   onKeyDown={toggleDrawer(false)}
     >
-      <h3 style={{ fontFamily: "Comic Sans MS" }}>History</h3>
+      <h3 style={{ fontFamily: "Comic Sans MS", marginTop: '20px'}} className="h3-text">History</h3>
       {travelCards && travelCards.length > 0 && (
         <>
           <List>

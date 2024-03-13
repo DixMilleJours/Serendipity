@@ -235,6 +235,7 @@ function HotelDetails({ setModalOpen, setHotelDetails }) {
             style={{
               fontSize: "25pt",
             }}
+            className="h3-text"
           >
             Hotel&nbsp;&nbsp;&nbsp;&nbsp;Details
           </h3>

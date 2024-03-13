@@ -5,7 +5,7 @@ import Footer from "../Index/Footer";
 import { Alert, Container } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import SearchBar from "../Search/SearchBar";
-import MediaCard from "../Display/MediaCard";
+import StackedPictures from "../Display/StackPictures";
 import Fade from "@mui/material/Fade";
 import "../../index.css";
 import "../../static/css/login.css";
@@ -13,6 +13,9 @@ import { useAuth } from "../../AuthContext";
 import Canvas from "./Canvas";
 import { useSelector } from "react-redux";
 import FeatureStacks from "../Display/FeatureStack";
+import { Container as BootstrapContainer } from "react-bootstrap";
+import 'bootstrap/dist/css/bootstrap.css';
+
 // need to use mui grid v2 for contents view
 
 export default function Home(prefer) {
@@ -74,6 +77,23 @@ export default function Home(prefer) {
       </Container>
 
       {!isSelected && <FeatureStacks />}
+      <BootstrapContainer style={{
+        display: 'flex',
+        marginTop: '10%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column' // Centers the content vertically
+      }}>
+      {/* <div className="ratio ratio-16x9">
+        <iframe
+          src="https://www.youtube.com/embed/RRT3Fz7SRKw"
+          title="YouTube video"
+          allowFullScreen
+          style={{ maxWidth: '100%' }} // Ensures the video is responsive
+        ></iframe>
+      </div> */}
+      {/* <StackedPictures /> */}
+    </BootstrapContainer>
 
       <div style={{ height: 200 }}></div>
       <Footer />

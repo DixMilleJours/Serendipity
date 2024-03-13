@@ -49,7 +49,7 @@ export default function AccountMenu({ username, setOpenHistoryDrawer }) {
             aria-expanded={open ? "true" : undefined}
           >
             <Avatar sx={{ width: 32, height: 32 }} src={currentUser.photoURL}>
-              {currentUser.displayName}
+              {currentUser && currentUser.displayName ? currentUser.displayName[0] : ""}
             </Avatar>
           </IconButton>
         </Tooltip>

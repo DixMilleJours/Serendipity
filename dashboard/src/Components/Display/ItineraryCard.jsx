@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -10,7 +10,7 @@ import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import { useSelector, useDispatch } from "react-redux";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Modal from "@mui/material/Modal";
@@ -22,9 +22,7 @@ import B5 from "../../static/images/bg5.jpg";
 import Typography from "@mui/material/Typography";
 import "../../static/css/modal.css";
 import { blueGrey, pink, teal } from "@mui/material/colors";
-import { useInView } from "react-intersection-observer";
-import Checkbox from '@mui/material/Checkbox';
-import useVisible from "./useVisible";
+import Box from "@mui/material/Box";
 
 function getImageSrc(randomNumber) {
   switch (randomNumber) {
@@ -39,22 +37,9 @@ function getImageSrc(randomNumber) {
     case 5:
       return B5;
     default:
-      return ''; // Default image or empty string if none is selected
+      return ""; // Default image or empty string if none is selected
   }
 }
-
-const FadeInCard = ({ children }) => {
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.5,
-  });
-
-  return (
-    <Card ref={ref} className={`fade-in ${inView ? "fade-in-visible" : ""}`}>
-      {children}
-    </Card>
-  );
-};
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -82,6 +67,43 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
     setExpanded(!expanded);
   };
 
+  const itemRefs = useRef(itineraryData.map(() => React.createRef()));
+  const [visibility, setVisibility] = useState(
+    new Array(itineraryData.length).fill(false)
+  );
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibility((prevVisibility) => {
+              const newVisibility = [...prevVisibility];
+              newVisibility[entry.target.dataset.index] = true;
+              return newVisibility;
+            });
+          }
+        });
+      },
+      { threshold: 0.1 } // Adjust threshold as needed
+    );
+
+    const currentRefs = itemRefs.current;
+    currentRefs.forEach((ref, index) => {
+      if (ref.current) {
+        observer.observe(ref.current);
+      }
+    });
+
+    return () => {
+      currentRefs.forEach((ref) => {
+        if (ref.current) {
+          observer.unobserve(ref.current);
+        }
+      });
+      observer.disconnect();
+    };
+  }, [itineraryData]);
 
   // console.log(itineraryData);
 
@@ -94,14 +116,7 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
     setOpen(true); // This will open the modal when invoked
   };
 
-  const [visibility, setVisibility] = useState(
-    new Array(itineraryData.length).fill(false)
-  );
-
   // Refs for each of the items
-  const itemRefs = useRef(
-    new Array(itineraryData.length).fill().map(() => React.createRef())
-  );
 
   const [randomNumber, setRandomNumber] = useState(null);
 
@@ -112,52 +127,8 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
 
   const imageSrc = getImageSrc(randomNumber);
 
-  // Effect to attach the IntersectionObserver to each ref
-  // React.useEffect(() => {
-  //   const observerCallback = (entries, observer) => {
-  //     entries.forEach((entry) => {
-  //       if (entry.isIntersecting) {
-  //         // Use the entry's target to find the index and update visibility state
-  //         const index = itemRefs.current.indexOf(entry.target);
-  //         setVisibility((prevVisibility) => ({
-  //           ...prevVisibility,
-  //           [index]: true, // Set visible
-  //         }));
-  //       }
-  //     });
-  //   };
-
-  //   const observerOptions = {
-  //     root: null,
-  //     rootMargin: "0px",
-  //     threshold: 0.1,
-  //   };
-
-  //   const observer = new IntersectionObserver(
-  //     observerCallback,
-  //     observerOptions
-  //   );
-
-  //   itemRefs.current.forEach((ref) => {
-  //     if (ref.current) {
-  //       observer.observe(ref.current);
-  //     }
-  //   });
-
-  //   // Cleanup observer on unmount
-  //   return () => {
-  //     if (itemRefs.current) {
-  //       itemRefs.current.forEach((ref) => {
-  //         if (ref.current) {
-  //           observer.unobserve(ref.current);
-  //         }
-  //       });
-  //     }
-  //   };
-  // }, [itineraryData]);
-
   if (!Array.isArray(itineraryData)) {
-    console.error('itineraryData is not an array', itineraryData);
+    console.error("itineraryData is not an array", itineraryData);
     // Handle the case when itineraryData is not an array
     return;
   }
@@ -181,13 +152,13 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
             <MoreVertIcon />
           </IconButton>
         }
-        title={"Travel Card " + index} 
+        title={"Travel Card " + index}
         subheader={dateString}
       />
       <CardMedia
         component="img"
         height="194"
-        image= {imageSrc}
+        image={imageSrc}
         alt="Travel Card"
       />
       <Collapse in={expanded} timeout="auto" unmountOnExit>
@@ -222,6 +193,7 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                   sx={{ margin: 2, padding: 2 }}
                   ref={itemRefs.current[index]}
                   // className={`fade-in ${visibility[index] ? 'visible' : ''}`}
+                  data-index={index}
                 >
                   <CardContent style={{ alignContent: "center" }}>
                     {/* Display the title if it exists */}
@@ -229,12 +201,13 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                       <Typography
                         variant="h3"
                         gutterBottom
+                        className="h3-text"
                         style={{
                           fontFamily: "Comic Sans MS",
                           marginLeft: "10%",
                           marginRight: "10%",
                           marginTop: 20,
-                          textAlign: 'center'
+                          textAlign: "center",
                         }}
                       >
                         {item.title}
@@ -244,11 +217,14 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                     {/* Display the day and its activities if they exist */}
                     {item.day && (
                       <>
-                        <div style={{marginLeft: '10%'}}>
+                        <div style={{ marginLeft: "10%" }}>
                           <Typography
                             variant="h5"
                             gutterBottom
-                            style={{ color: pink[500],fontFamily: "Comic Sans MS", }}
+                            style={{
+                              color: pink[500],
+                              fontFamily: "Comic Sans MS",
+                            }}
                           >
                             {item.day}
                           </Typography>
@@ -257,7 +233,10 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                               key={activityIndex}
                               variant="body1"
                               sx={{ marginBottom: 1 }}
-                              style={{fontFamily: 'Montserrat', fontSize: "18px"}}
+                              style={{
+                                fontFamily: "Montserrat",
+                                fontSize: "18px",
+                              }}
                             >
                               -- {activity}
                             </Typography>
@@ -272,8 +251,8 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                         variant="body1"
                         style={{
                           fontFamily: "Comic Sans MS",
-                          marginLeft: '10%',
-                          marginRight: '10%',
+                          marginLeft: "10%",
+                          marginRight: "10%",
                           color: teal[700],
                         }}
                       >
@@ -281,7 +260,9 @@ export default function ItineraryCard({ index, itineraryData = [], onDelete }) {
                       </Typography>
                     )}
                   </CardContent>
+                  
                 </div>
+                
               );
             })}
             {/* </FadeInCard> */}
