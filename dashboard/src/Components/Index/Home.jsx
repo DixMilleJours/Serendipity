@@ -77,13 +77,13 @@ export default function Home(prefer) {
       </Container>
 
       {!isSelected && <FeatureStacks />}
-      <BootstrapContainer style={{
+      {/* <BootstrapContainer style={{
         display: 'flex',
         marginTop: '10%',
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'column' // Centers the content vertically
-      }}>
+      }}> */}
       {/* <div className="ratio ratio-16x9">
         <iframe
           src="https://www.youtube.com/embed/RRT3Fz7SRKw"
@@ -93,7 +93,7 @@ export default function Home(prefer) {
         ></iframe>
       </div> */}
       {/* <StackedPictures /> */}
-    </BootstrapContainer>
+    {/* </BootstrapContainer> */}
 
       <div style={{ height: 200 }}></div>
       <Footer />
