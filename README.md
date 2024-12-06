@@ -37,3 +37,10 @@ overall travel experience.
 ### Footer
 ![wave](https://github.com/user-attachments/assets/4a5dae3b-695d-4dd8-9e62-00f6362582d9)
 - Moving waves for a better visual experience.
+
+### Trip Recommendation
+- Our application is able to suggest an optimal itinerary with real flights, hotels, and places of interest, instead of mock data!
+
+![Picture1](https://github.com/user-attachments/assets/63f5a49c-ee22-40a1-a270-30c79ecc40c6)
+  - note: this is a plain-text example of the functionality. Corresponding UI for a better display of the generated itinerary is not shown here.
+
