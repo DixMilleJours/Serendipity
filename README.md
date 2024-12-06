@@ -37,7 +37,3 @@ overall travel experience.
 ### Footer
 ![wave](https://github.com/user-attachments/assets/4a5dae3b-695d-4dd8-9e62-00f6362582d9)
 - Moving waves for a better visual experience.
-
-## 1.4 Technical Details
-
-
